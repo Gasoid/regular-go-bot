@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -59,12 +60,20 @@ func main() {
 		if !hasItBeen() {
 			continue
 		}
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+		msg.DisableWebPagePreview = true
+		if strings.Contains(update.Message.Text, "```") {
+			msg.Text = ":hmm:"
+			msg.ReplyToMessageID = update.Message.MessageID
+			if _, err := bot.Send(msg); err != nil {
+				log.Println(err.Error())
+			}
+			continue
+		}
 		if !update.Message.IsCommand() { // ignore any non-command Messages
 			continue
 		}
 
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
-		msg.DisableWebPagePreview = true
 		// Extract the command from the Message.
 		switch update.Message.Command() {
 		case "help":
@@ -87,7 +96,7 @@ func main() {
 		}
 
 		if _, err := bot.Send(msg); err != nil {
-			log.Panic(err)
+			log.Println(err.Error())
 		}
 	}
 }
