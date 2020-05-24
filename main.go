@@ -14,13 +14,14 @@ import (
 const (
 	token       = "TOKEN"
 	gistNewsURL = "GIST_LOGS_URL"
+	endDate     = "Jun 17 2020"
 )
 
 func getLogs() string {
 	resp, err := http.Get(os.Getenv(gistNewsURL))
 	if err != nil {
 		log.Printf("couldn't retrieve news %v", err)
-		return "не смогу получить новости"
+		return "не смог получить новости"
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
@@ -58,10 +59,10 @@ func main() {
 		// Extract the command from the Message.
 		switch update.Message.Command() {
 		case "help":
-			msg.Text = "type /changelog or /estimation."
+			msg.Text = "набирай /changelog или /estimation."
 		case "estimation":
 			msgDuration := ""
-			june17, _ := time.Parse("Jan 02 2006", "Jun 17 2020")
+			june17, _ := time.Parse("Jan 02 2006", endDate)
 			duration := june17.Sub(time.Now())
 			days := duration.Hours() / 24
 			if days > 1 {
