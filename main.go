@@ -17,6 +17,7 @@ const (
 	endDate     = "Jun 17 2020"
 	timeBreak   = 30 // seconds
 	helpMessage = "набирай /changelog или /estimation.\nисходник: https://github.com/Gasoid/regular-go-bot"
+	typeCode    = "code"
 )
 
 var lastUpdate time.Time
@@ -39,7 +40,7 @@ func hasItBeen() bool {
 
 func isCode(entities []tgbotapi.MessageEntity) bool {
 	for _, entity := range entities {
-		if entity.Type == "code" {
+		if entity.Type == typeCode {
 			return true
 		}
 	}
@@ -76,11 +77,13 @@ func main() {
 			if _, err := bot.Send(msg); err != nil {
 				log.Println(err.Error())
 			}
+			lastUpdate = time.Now()
+			continue
 		}
 		if !update.Message.IsCommand() { // ignore any non-command Messages
 			continue
 		}
-
+		lastUpdate = time.Now()
 		// Extract the command from the Message.
 		switch update.Message.Command() {
 		case "help":
