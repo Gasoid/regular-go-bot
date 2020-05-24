@@ -1,7 +1,7 @@
 version: '2.3'
 
 services:
-  deportal:
+  bot:
     image: gasoid/regular-go-bot:latest
     restart: always
     environment:
