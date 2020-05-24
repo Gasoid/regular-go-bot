@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -38,6 +37,15 @@ func hasItBeen() bool {
 	return duration.Seconds() > timeBreak
 }
 
+func isCode(entities []tgbotapi.MessageEntity) bool {
+	for _, entity := range entities {
+		if entity.Type == "code" {
+			return true
+		}
+	}
+	return false
+}
+
 func main() {
 	bot, err := tgbotapi.NewBotAPI(os.Getenv(token))
 	if err != nil {
@@ -62,13 +70,12 @@ func main() {
 		}
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 		msg.DisableWebPagePreview = true
-		if strings.Contains(update.Message.Text, "```") {
+		if isCode(*update.Message.Entities) {
 			msg.Text = ":hmm:"
 			msg.ReplyToMessageID = update.Message.MessageID
 			if _, err := bot.Send(msg); err != nil {
 				log.Println(err.Error())
 			}
-			continue
 		}
 		if !update.Message.IsCommand() { // ignore any non-command Messages
 			continue
