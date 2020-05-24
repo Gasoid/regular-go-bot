@@ -1,0 +1,11 @@
+version: '2.3'
+
+services:
+  deportal:
+    image: gasoid/regular-go-bot:latest
+    restart: always
+    environment:
+      - PORT=8080
+      - GIN_MODE=release
+      - GIST_LOGS_URL
+      - TOKEN
