@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -38,13 +39,8 @@ func hasItBeen() bool {
 	return duration.Seconds() > timeBreak
 }
 
-func isCode(entities []tgbotapi.MessageEntity) bool {
-	for _, entity := range entities {
-		if entity.Type == typeCode {
-			return true
-		}
-	}
-	return false
+func isCode(message *tgbotapi.Message) bool {
+	return strings.Contains(message.Text, "github") && !strings.Contains(message.Text, "gasoid")
 }
 
 func main() {
@@ -71,7 +67,7 @@ func main() {
 		}
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 		msg.DisableWebPagePreview = true
-		if isCode(*update.Message.Entities) {
+		if isCode(update.Message) {
 			msg.Text = ":hmm:"
 			msg.ReplyToMessageID = update.Message.MessageID
 			if _, err := bot.Send(msg); err != nil {
