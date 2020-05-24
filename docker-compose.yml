@@ -9,3 +9,5 @@ services:
       - GIN_MODE=release
       - GIST_LOGS_URL
       - TOKEN
+    logging:
+      driver: syslog
