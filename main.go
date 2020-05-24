@@ -15,17 +15,26 @@ const (
 	token       = "TOKEN"
 	gistNewsURL = "GIST_LOGS_URL"
 	endDate     = "Jun 17 2020"
+	timeBreak   = 30 // seconds
+	helpMessage = "набирай /changelog или /estimation.\nисходник: https://github.com/Gasoid/regular-go-bot"
 )
+
+var lastUpdate time.Time
 
 func getLogs() string {
 	resp, err := http.Get(os.Getenv(gistNewsURL))
 	if err != nil {
 		log.Printf("couldn't retrieve news %v", err)
-		return "не смог получить новости"
+		return "не могу получить новости"
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	return string(body)
+}
+
+func hasItBeen() bool {
+	duration := time.Now().Sub(lastUpdate)
+	return duration.Seconds() > timeBreak
 }
 
 func main() {
@@ -40,26 +49,26 @@ func main() {
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
-
+	lastUpdate = time.Now()
 	updates, err := bot.GetUpdatesChan(u)
 
 	for update := range updates {
 		if update.Message == nil { // ignore any non-Message updates
 			continue
 		}
-
+		if !hasItBeen() {
+			continue
+		}
 		if !update.Message.IsCommand() { // ignore any non-command Messages
 			continue
 		}
 
-		// Create a new MessageConfig. We don't have text yet,
-		// so we should leave it empty.
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
-
+		msg.DisableWebPagePreview = true
 		// Extract the command from the Message.
 		switch update.Message.Command() {
 		case "help":
-			msg.Text = "набирай /changelog или /estimation."
+			msg.Text = helpMessage
 		case "estimation":
 			msgDuration := ""
 			june17, _ := time.Parse("Jan 02 2006", endDate)
