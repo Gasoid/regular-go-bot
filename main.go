@@ -16,7 +16,7 @@ const (
 	token       = "TOKEN"
 	gistNewsURL = "GIST_LOGS_URL"
 	endDate     = "Jun 17 2020"
-	timeBreak   = 30 // seconds
+	timeBreak   = 5 // seconds
 	helpMessage = "набирай /changelog или /estimation.\nисходник: https://github.com/Gasoid/regular-go-bot"
 	typeCode    = "code"
 )
@@ -89,10 +89,11 @@ func main() {
 			june17, _ := time.Parse("Jan 02 2006", endDate)
 			duration := june17.Sub(time.Now())
 			days := duration.Hours() / 24
+			hours := duration.Hours() - float64(int(days)*24)
 			if days > 1 {
-				msgDuration = fmt.Sprintf("%1.f дн", days)
+				msgDuration = fmt.Sprintf("%1.f дн %1.f ч", days, hours)
 			} else {
-				msgDuration = fmt.Sprintf("%v часов", duration.Hours())
+				msgDuration = fmt.Sprintf("%1.f часов", duration.Hours())
 			}
 			msg.Text = fmt.Sprintf("Результаты отбора будут объявлены 17 июня. Осталось: %v", msgDuration)
 		case "changelog":
