@@ -7,5 +7,7 @@ services:
     environment:
       - GIST_LOGS_URL
       - TOKEN
+    env_file:
+      - bot.env
     logging:
       driver: syslog

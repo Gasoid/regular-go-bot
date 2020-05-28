@@ -39,8 +39,25 @@ func hasItBeen() bool {
 	return duration.Seconds() > timeBreak
 }
 
-func isCode(message *tgbotapi.Message) bool {
-	return strings.Contains(message.Text, "github") && !strings.Contains(message.Text, "gasoid")
+func isOzonEmployee(firstName, secondName string) bool {
+	return false
+}
+
+var phrases = map[string]string{
+	"github":                  "github",
+	"https://play.golang.org": "play",
+	"https://ozon":            "ozon",
+}
+
+var newMembersID map[int]tgbotapi.User
+
+func findKeyPhrase(message *tgbotapi.Message) string {
+	for k, v := range phrases {
+		if strings.Contains(message.Text, k) && !strings.Contains(message.Text, "gasoid") {
+			return v
+		}
+	}
+	return ""
 }
 
 func main() {
@@ -57,6 +74,7 @@ func main() {
 	u.Timeout = 60
 	lastUpdate = time.Now()
 	updates, err := bot.GetUpdatesChan(u)
+	newMembersID = make(map[int]tgbotapi.User)
 
 	for update := range updates {
 		if update.Message == nil { // ignore any non-Message updates
@@ -67,42 +85,63 @@ func main() {
 		}
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 		msg.DisableWebPagePreview = true
-		if isCode(update.Message) {
+		switch findKeyPhrase(update.Message) {
+		case "github":
 			msg.Text = "🤔"
 			msg.ReplyToMessageID = update.Message.MessageID
-			if _, err := bot.Send(msg); err != nil {
-				log.Println(err.Error())
-			}
-			lastUpdate = time.Now()
-			continue
+		case "play":
+			msg.Text = "😁"
+			msg.ReplyToMessageID = update.Message.MessageID
+		case "ozon":
+			msg.Text = "👿"
+			msg.ReplyToMessageID = update.Message.MessageID
 		}
-		if !update.Message.IsCommand() { // ignore any non-command Messages
-			continue
+		for _, member := range *update.Message.NewChatMembers {
+			newMembersID[member.ID] = member
+			msg.ReplyToMessageID = update.Message.MessageID
+			msg.Text = "сколько будет 1 + 11 = ?"
+			go func(ID int, chatID int64) {
+				time.Sleep(2 * time.Minute)
+				if _, ok := newMembersID[ID]; !ok {
+					return
+				}
+				conf := tgbotapi.KickChatMemberConfig{}
+				conf.ChatID = chatID
+				conf.UserID = ID
+				bot.KickChatMember(conf)
+			}(member.ID, update.Message.Chat.ID)
 		}
-		lastUpdate = time.Now()
-		// Extract the command from the Message.
-		switch update.Message.Command() {
-		case "help":
-			msg.Text = helpMessage
-		case "estimation":
-			msgDuration := ""
-			june17, _ := time.Parse("Jan 02 2006", endDate)
-			duration := june17.Sub(time.Now())
-			days := duration.Hours() / 24
-			hours := duration.Hours() - float64(int(days)*24)
-			if days > 1 {
-				msgDuration = fmt.Sprintf("%1.f дн %1.f ч", days, hours)
-			} else {
-				msgDuration = fmt.Sprintf("%1.f часов", duration.Hours())
+		if _, ok := newMembersID[update.Message.From.ID]; ok && update.Message.Text == "12" {
+			delete(newMembersID, update.Message.From.ID)
+		}
+
+		if update.Message.IsCommand() {
+			// Extract the command from the Message.
+			switch update.Message.Command() {
+			case "help":
+				msg.Text = helpMessage
+			case "estimation":
+				msgDuration := ""
+				june17, _ := time.Parse("Jan 02 2006", endDate)
+				duration := june17.Sub(time.Now())
+				days := duration.Hours() / 24
+				hours := duration.Hours() - float64(int(days)*24)
+				if days > 1 {
+					msgDuration = fmt.Sprintf("%1.f дн %1.f ч", days, hours)
+				} else {
+					msgDuration = fmt.Sprintf("%1.f часов", duration.Hours())
+				}
+				msg.Text = fmt.Sprintf("Результаты отбора будут объявлены 17 июня. Осталось: %v", msgDuration)
+			case "changelog":
+				msg.Text = getLogs()
+			default:
+				msg.Text = "Хм, не знаю такую команду"
 			}
-			msg.Text = fmt.Sprintf("Результаты отбора будут объявлены 17 июня. Осталось: %v", msgDuration)
-		case "changelog":
-			msg.Text = getLogs()
-		default:
-			msg.Text = "Хм, не знаю такую команду"
+
 		}
 
 		if _, err := bot.Send(msg); err != nil {
+			lastUpdate = time.Now()
 			log.Println(err.Error())
 		}
 	}
