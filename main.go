@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"strings"
@@ -49,7 +50,7 @@ var phrases = map[string]string{
 	"https://ozon":            "ozon",
 }
 
-var newMembersID map[int]tgbotapi.User
+var newMembersID map[int]int
 
 func findKeyPhrase(message *tgbotapi.Message) string {
 	for k, v := range phrases {
@@ -74,7 +75,7 @@ func main() {
 	u.Timeout = 60
 	lastUpdate = time.Now()
 	updates, err := bot.GetUpdatesChan(u)
-	newMembersID = make(map[int]tgbotapi.User)
+	newMembersID = make(map[int]int)
 
 	for update := range updates {
 		if update.Message == nil { // ignore any non-Message updates
@@ -98,9 +99,11 @@ func main() {
 		}
 		if update.Message.NewChatMembers != nil {
 			for _, member := range *update.Message.NewChatMembers {
-				newMembersID[member.ID] = member
+				//rand.Seed(12000)
+				answer := rand.Intn(200)
+				newMembersID[member.ID] = answer + 1
 				msg.ReplyToMessageID = update.Message.MessageID
-				msg.Text = "сколько будет 1 + 11 = ?"
+				msg.Text = fmt.Sprintf("@%s сколько будет 1 + %d = ?", member.UserName, answer)
 				go func(ID int, chatID int64) {
 					time.Sleep(2 * time.Minute)
 					if _, ok := newMembersID[ID]; !ok {
@@ -109,13 +112,16 @@ func main() {
 					conf := tgbotapi.KickChatMemberConfig{}
 					conf.ChatID = chatID
 					conf.UserID = ID
+					//conf.UntilDate =
 					bot.KickChatMember(conf)
 				}(member.ID, update.Message.Chat.ID)
 			}
 		}
 
-		if _, ok := newMembersID[update.Message.From.ID]; ok && update.Message.Text == "12" {
-			delete(newMembersID, update.Message.From.ID)
+		if a, ok := newMembersID[update.Message.From.ID]; ok {
+			if update.Message.Text == fmt.Sprint(a) {
+				delete(newMembersID, update.Message.From.ID)
+			}
 		}
 
 		if update.Message.IsCommand() {
