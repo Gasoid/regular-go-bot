@@ -96,21 +96,24 @@ func main() {
 			msg.Text = "👿"
 			msg.ReplyToMessageID = update.Message.MessageID
 		}
-		for _, member := range *update.Message.NewChatMembers {
-			newMembersID[member.ID] = member
-			msg.ReplyToMessageID = update.Message.MessageID
-			msg.Text = "сколько будет 1 + 11 = ?"
-			go func(ID int, chatID int64) {
-				time.Sleep(2 * time.Minute)
-				if _, ok := newMembersID[ID]; !ok {
-					return
-				}
-				conf := tgbotapi.KickChatMemberConfig{}
-				conf.ChatID = chatID
-				conf.UserID = ID
-				bot.KickChatMember(conf)
-			}(member.ID, update.Message.Chat.ID)
+		if update.Message.NewChatMembers != nil {
+			for _, member := range *update.Message.NewChatMembers {
+				newMembersID[member.ID] = member
+				msg.ReplyToMessageID = update.Message.MessageID
+				msg.Text = "сколько будет 1 + 11 = ?"
+				go func(ID int, chatID int64) {
+					time.Sleep(2 * time.Minute)
+					if _, ok := newMembersID[ID]; !ok {
+						return
+					}
+					conf := tgbotapi.KickChatMemberConfig{}
+					conf.ChatID = chatID
+					conf.UserID = ID
+					bot.KickChatMember(conf)
+				}(member.ID, update.Message.Chat.ID)
+			}
 		}
+
 		if _, ok := newMembersID[update.Message.From.ID]; ok && update.Message.Text == "12" {
 			delete(newMembersID, update.Message.From.ID)
 		}
