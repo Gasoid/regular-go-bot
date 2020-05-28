@@ -114,6 +114,7 @@ func main() {
 					conf.UserID = ID
 					//conf.UntilDate =
 					bot.KickChatMember(conf)
+					delete(newMembersID, ID)
 				}(member.ID, update.Message.Chat.ID)
 			}
 		}
