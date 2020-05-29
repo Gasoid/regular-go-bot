@@ -125,6 +125,8 @@ func main() {
 
 		if a, ok := newMembersID[update.Message.From.ID]; ok {
 			if update.Message.Text == fmt.Sprint(a) {
+				msg.Text = "По-любому ты сделал задание E!?"
+				msg.ReplyToMessageID = update.Message.MessageID
 				delete(newMembersID, update.Message.From.ID)
 			}
 		}
