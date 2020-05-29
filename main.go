@@ -103,11 +103,11 @@ func main() {
 				answer := rand.Intn(200)
 				newMembersID[member.ID] = answer + 1
 				//msg.ReplyToMessageID = update.Message.MessageID
-				mention := member.FirstName
-				if mention == "" {
-					mention = member.UserName
+				mention := fmt.Sprintf("@%s", member.UserName)
+				if member.UserName == "" {
+					mention = fmt.Sprintf("%s %s", member.FirstName, member.LastName)
 				}
-				msg.Text = fmt.Sprintf("[%s](tg://user?id=%d) сколько будет 1 + %d = ?", mention, member.ID, answer)
+				msg.Text = fmt.Sprintf("%s сколько будет 1 + %d = ?", mention, answer)
 				go func(ID int, chatID int64) {
 					time.Sleep(2 * time.Minute)
 					if _, ok := newMembersID[ID]; !ok {
