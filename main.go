@@ -81,9 +81,9 @@ func main() {
 		if update.Message == nil { // ignore any non-Message updates
 			continue
 		}
-		if !hasItBeen() {
-			continue
-		}
+		// if !hasItBeen() {
+		// 	continue
+		// }
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 		msg.DisableWebPagePreview = true
 		switch findKeyPhrase(update.Message) {
