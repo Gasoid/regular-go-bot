@@ -107,7 +107,7 @@ func main() {
 				if member.UserName == "" {
 					mention = fmt.Sprintf("%s %s", member.FirstName, member.LastName)
 				}
-				msg.Text = fmt.Sprintf("%s сколько будет 1 + %d = ? у тебя 2 минуты на ответ. Затем пожалуйста прочитай шапку группы!", mention, answer)
+				msg.Text = fmt.Sprintf("%s сколько будет 1 + %d = ? у тебя 2 минуты на ответ. Затем, пожалуйста, прочитай шапку группы!", mention, answer)
 				go func(ID int, chatID int64) {
 					time.Sleep(2 * time.Minute)
 					if _, ok := newMembersID[ID]; !ok {
