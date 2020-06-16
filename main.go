@@ -139,6 +139,10 @@ func main() {
 			case "estimation":
 				msgDuration := ""
 				june17, _ := time.Parse("Jan 02 2006", endDate)
+				if june17.Before(time.Now()) {
+					msg.Text = fmt.Sprintf("По идее результаты должны быть уже. Больше ничего не знаю!")
+					break
+				}
 				duration := june17.Sub(time.Now())
 				days := duration.Hours() / 24
 				hours := duration.Hours() - float64(int(days)*24)
