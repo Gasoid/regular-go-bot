@@ -18,6 +18,10 @@ func getLogs() string {
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("couldn't retrieve news %v", err)
+		return "не могу получить новости"
+	}
 	return string(body)
 }
 
