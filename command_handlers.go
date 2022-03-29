@@ -20,18 +20,23 @@ func currency(c *BotContext) {
 	}
 	ex.SetBase("EUR")
 	eur, err := ex.ConvertTo("RUB", 1)
-
+	if err != nil {
+		log.Print("exchange got error:", err.Error())
+	}
 	ex.SetBase("BTC")
 	btc, err := ex.ConvertTo("EUR", 1)
-
+	if err != nil {
+		log.Print("exchange got error:", err.Error())
+	}
 	ex.SetBase("ETH")
 	eth, err := ex.ConvertTo("EUR", 1)
-
-	c.Text(fmt.Sprintf("$: %.2fруб €: %.2fруб \n BTC: %.2feur, ETH: %.2feur", usd, eur, btc, eth))
+	if err != nil {
+		log.Print("exchange got error:", err.Error())
+	}
+	c.Text(fmt.Sprintf("$: %.2fруб \n€: %.2fруб \nBTC: %.2feur \nETH: %.2feur", usd, eur, btc, eth))
 }
 
 func joke(c *BotContext) {
-
 	reqURL := "https://jokesrv.rubedo.cloud/oneliner"
 	req, err := http.NewRequest("GET", reqURL, nil)
 	if err != nil {
@@ -69,10 +74,11 @@ func estimation(c *BotContext) {
 	msgDuration := ""
 	june17, _ := time.Parse("Jan 02 2006", endDate)
 	if june17.Before(time.Now()) {
-		c.Text(fmt.Sprintf("По идее результаты должны быть уже. Больше ничего не знаю!"))
+		c.Text("По идее результаты должны быть уже. Больше ничего не знаю!")
 		return
 	}
-	duration := june17.Sub(time.Now())
+
+	duration := time.Until(june17)
 	days := duration.Hours() / 24
 	hours := duration.Hours() - float64(int(days)*24)
 	if days > 1 {

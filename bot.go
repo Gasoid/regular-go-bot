@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"os"
-	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -60,13 +59,11 @@ func (b *Bot) NewBotContext(update *tgbotapi.Update) *BotContext {
 func (b *Bot) Flush(c *BotContext) {
 	if c.Msg.Text != "" {
 		if _, err := b.api.Send(c.Msg); err != nil {
-			lastUpdate = time.Now()
 			log.Println(err.Error())
 		}
 	}
 	if c.Action != nil {
 		if _, err := b.api.Send(c.Action); err != nil {
-			lastUpdate = time.Now()
 			log.Println(err.Error())
 		}
 	}
