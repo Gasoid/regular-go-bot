@@ -4,9 +4,9 @@ services:
   bot:
     image: ghcr.io/gasoid/regular-go-bot:v1.1.1
     restart: always
-    environment:
-      - GIST_LOGS_URL
-      - TOKEN
+    # environment:
+    #   - GIST_LOGS_URL
+    #   - TOKEN
     env_file:
       - bot.env
     logging:
