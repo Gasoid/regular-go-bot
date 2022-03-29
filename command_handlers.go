@@ -18,17 +18,26 @@ func currency(c *BotContext) {
 	if err != nil {
 		log.Print("exchange got error:", err.Error())
 	}
-	ex.SetBase("EUR")
+	err = ex.SetBase("EUR")
+	if err != nil {
+		log.Print("exchange got error:", err.Error())
+	}
 	eur, err := ex.ConvertTo("RUB", 1)
 	if err != nil {
 		log.Print("exchange got error:", err.Error())
 	}
-	ex.SetBase("BTC")
+	err = ex.SetBase("BTC")
+	if err != nil {
+		log.Print("exchange got error:", err.Error())
+	}
 	btc, err := ex.ConvertTo("EUR", 1)
 	if err != nil {
 		log.Print("exchange got error:", err.Error())
 	}
-	ex.SetBase("ETH")
+	err = ex.SetBase("ETH")
+	if err != nil {
+		log.Print("exchange got error:", err.Error())
+	}
 	eth, err := ex.ConvertTo("EUR", 1)
 	if err != nil {
 		log.Print("exchange got error:", err.Error())
