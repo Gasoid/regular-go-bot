@@ -90,7 +90,7 @@ func (b *Bot) HandleCommand(update *tgbotapi.Update) {
 }
 
 func (b *Bot) HandleOzon(update *tgbotapi.Update) {
-	if b.IsOzon() {
+	if b.IsOzon(update) {
 		c := b.NewBotContext(update)
 		checkOzon(c)
 		b.Flush(c)

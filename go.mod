@@ -1,6 +1,6 @@
-module regulargobot
+module github.com/Gasoid/regular-go-bot
 
-go 1.18
+go 1.16
 
 require (
 	github.com/asvvvad/exchange v0.0.0-20200622145202-a6da1ed4965a
