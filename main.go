@@ -4,7 +4,7 @@ const (
 	token       = "TOKEN"
 	gistNewsURL = "GIST_LOGS_URL"
 	endDate     = "Jun 17 2020"
-	helpMessage = "набирай /changelog или /estimation.\nисходник: https://github.com/Gasoid/regular-go-bot"
+	helpMessage = "/currency - курс валют \n/joke - шутка\n/holiday - какой сегодня праздник\nнабирай /changelog или /estimation.\nисходник: https://github.com/Gasoid/regular-go-bot"
 	timeout     = 60
 	enableOzon  = "ENABLE_OZON"
 	gozone      = "Gozone"
@@ -27,7 +27,8 @@ func main() {
 	bot.Command("changelog", changelog)
 	bot.Command("currency", currency)
 	bot.Command("joke", joke)
-
+	bot.Command("holiday", holiday)
+	go runEndpoint()
 	for update := range updates {
 		if update.Message == nil {
 			continue

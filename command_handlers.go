@@ -8,8 +8,26 @@ import (
 
 	"net/http"
 
+	"github.com/Gasoid/workalendar/europe/germany/bavaria"
+	"github.com/Gasoid/workalendar/europe/russia"
 	"github.com/asvvvad/exchange"
 )
+
+func holiday(c *BotContext) {
+	now := time.Now()
+
+	if russia.IsHoliday(now) {
+		h, _ := russia.GetHoliday(now)
+		c.Text(fmt.Sprintf("Праздник сегодня: %s", h))
+	} else {
+		holidayBavaria, err := bavaria.GetHoliday(now)
+		if err != nil {
+			c.Text("Нету праздников сегодня")
+		} else {
+			c.Text(fmt.Sprintf("В РФ нету праздников, а в Баварии сегодня: %s", holidayBavaria))
+		}
+	}
+}
 
 func currency(c *BotContext) {
 	ex := exchange.New("USD")
@@ -34,15 +52,15 @@ func currency(c *BotContext) {
 	if err != nil {
 		log.Print("exchange got error:", err.Error())
 	}
-	err = ex.SetBase("ETH")
-	if err != nil {
-		log.Print("exchange got error:", err.Error())
-	}
-	eth, err := ex.ConvertTo("EUR", 1)
-	if err != nil {
-		log.Print("exchange got error:", err.Error())
-	}
-	c.Text(fmt.Sprintf("$: %.2fруб \n€: %.2fруб \nBTC: %.2feur \nETH: %.2feur", usd, eur, btc, eth))
+	// err = ex.SetBase("ETH")
+	// if err != nil {
+	// 	log.Print("exchange got error:", err.Error())
+	// }
+	// eth, err := ex.ConvertTo("EUR", 1)
+	// if err != nil {
+	// 	log.Print("exchange got error:", err.Error())
+	// }
+	c.Text(fmt.Sprintf("**курс валют** \n$: %.2fруб \n€: %.2fруб \nBTC: %.2feur", usd, eur, btc))
 }
 
 func joke(c *BotContext) {

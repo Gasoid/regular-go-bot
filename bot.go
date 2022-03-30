@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"runtime/debug"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -74,6 +76,12 @@ func (b *Bot) Command(cmd string, f func(c *BotContext)) {
 }
 
 func (b *Bot) HandleCommand(update *tgbotapi.Update) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Bot got unexpected error")
+			fmt.Println("stacktrace from panic: \n" + string(debug.Stack()))
+		}
+	}()
 	if !update.Message.IsCommand() {
 		return
 	}
