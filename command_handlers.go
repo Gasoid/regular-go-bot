@@ -11,6 +11,23 @@ import (
 	"github.com/Gasoid/workalendar/europe/germany/bavaria"
 	"github.com/Gasoid/workalendar/europe/russia"
 	"github.com/asvvvad/exchange"
+	cbr "github.com/matperez/go-cbr-client"
+)
+
+const (
+	currencyMsgTmpl = `
+**КУРСЫ ВАЛЮТ**
+ЦБ РФ:
+$: %.2fруб
+€: %.2fруб
+
+FOREX:
+$: %.2fруб
+€: %.2fруб
+
+CRYPTO:
+BTC: %.2feur
+	`
 )
 
 func holiday(c *BotContext) {
@@ -60,7 +77,16 @@ func currency(c *BotContext) {
 	// if err != nil {
 	// 	log.Print("exchange got error:", err.Error())
 	// }
-	c.Text(fmt.Sprintf("**курс валют** \n$: %.2fруб \n€: %.2fруб \nBTC: %.2feur", usd, eur, btc))
+	cbrClient := cbr.NewClient()
+	cbrUsd, err := cbrClient.GetRate("USD", time.Now())
+	if err != nil {
+		log.Print("cbr got error:", err.Error())
+	}
+	cbrEur, err := cbrClient.GetRate("EUR", time.Now())
+	if err != nil {
+		log.Print("cbr got error:", err.Error())
+	}
+	c.Text(fmt.Sprintf(currencyMsgTmpl, cbrUsd, cbrEur, usd, eur, btc))
 }
 
 func joke(c *BotContext) {
