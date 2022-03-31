@@ -52,6 +52,8 @@ func (b *Bot) IsOzon(update *tgbotapi.Update) bool {
 
 func (b *Bot) NewBotContext(update *tgbotapi.Update) *BotContext {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+	msg.ParseMode = tgbotapi.ModeMarkdown
+	msg.DisableWebPagePreview = true
 	return &BotContext{
 		Update: update,
 		Msg:    &msg,
