@@ -28,6 +28,8 @@ func main() {
 	bot.Command("currency", currency)
 	bot.Command("joke", joke)
 	bot.Command("holiday", holiday)
+	bot.Command("weather", weather)
+	bot.Command("chat_info", chatInfo)
 	go runEndpoint()
 	for update := range updates {
 		if update.Message == nil {

@@ -104,6 +104,10 @@ func (b *Bot) HandleOzon(update *tgbotapi.Update) {
 	}
 }
 
-func (c *BotContext) Text(text string) {
-	c.Msg.Text = text
+func (c *BotContext) Text(text string, args ...interface{}) {
+	if args != nil {
+		c.Msg.Text = fmt.Sprintf(text, args...)
+	} else {
+		c.Msg.Text = text
+	}
 }

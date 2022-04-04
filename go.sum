@@ -2,6 +2,8 @@ github.com/Gasoid/workalendar v0.2.1 h1:0pZykBYpDlRzdlZEWOaU2MCPpUaCrM27szwUR8Gk
 github.com/Gasoid/workalendar v0.2.1/go.mod h1:v4Le/DKRe8RDboVjaQFHhzrqzv0Gl5n88IY+eOylrn8=
 github.com/asvvvad/exchange v0.0.0-20200622145202-a6da1ed4965a h1:YI1Ar2VuzNruXerRVh2fp+ReyojouSP+iGYhRjBAR2k=
 github.com/asvvvad/exchange v0.0.0-20200622145202-a6da1ed4965a/go.mod h1:t+v2UzsF8W/GegZJXp5+pP1s7sZ2TiHUy1sC1nzTVrc=
+github.com/briandowns/openweathermap v0.16.0 h1:js8THhUE4nVYbpedSCs0E5vxYzxkkOLtxrOFh9xed8c=
+github.com/briandowns/openweathermap v0.16.0/go.mod h1:0GLnknqicWxXnGi1IqoOaZIw+kIe5hkt+YM5WY3j8+0=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1 h1:wG8n/XJQ07TmjbITcGiUaOtXxdrINDz1b0J1w0SzqDc=
