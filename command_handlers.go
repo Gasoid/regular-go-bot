@@ -31,7 +31,7 @@ $: %.2f руб
 BTC: %.2f eur
 `
 	// name, weather.description, main.temp, wind.speed
-	weatherTmpl = `%s, %s, %fC, %fm/s`
+	weatherTmpl = `%s, %s %.1fC, %.1fm/s`
 )
 
 var (
@@ -48,7 +48,7 @@ func weather(c *BotContext) {
 	apiKey := os.Getenv("OWM_API_KEY")
 	w, err := owm.NewCurrent("C", "ru", apiKey)
 	if err != nil {
-		log.Println(err)
+		log.Println("couldn't load weather", err)
 		return
 	}
 	cities := []string{"Saratov, RU", "Wuerzburg, DE", "Moscow, RU"}
