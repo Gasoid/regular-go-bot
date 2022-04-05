@@ -30,6 +30,9 @@ func main() {
 	bot.Command("holiday", holiday)
 	bot.Command("weather", weather)
 	bot.Command("chat_info", chatInfo)
+	bot.Command("random", randomizer)
+	bot.Command("b64encode", encB64)
+	bot.Command("b64decode", decB64)
 	go runEndpoint()
 	for update := range updates {
 		if update.Message == nil {
