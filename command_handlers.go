@@ -46,7 +46,7 @@ func decB64(c *BotContext) {
 		c.Text("🧨 it is not base64 string")
 		return
 	}
-	c.Text("```%s```", string(text))
+	c.Text(string(text))
 }
 
 func randomizer(c *BotContext) {

@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"runtime/debug"
+	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -64,6 +65,9 @@ func (b *Bot) Flush(c *BotContext) {
 	if c.Msg.Text != "" {
 		if _, err := b.api.Send(c.Msg); err != nil {
 			log.Println(err.Error())
+			c.Msg.ParseMode = ""
+			log.Println("trying to send it without markdown")
+			b.api.Send(c.Msg)
 		}
 	}
 	if c.Action != nil {
@@ -113,4 +117,5 @@ func (c *BotContext) Text(text string, args ...interface{}) {
 	} else {
 		c.Msg.Text = text
 	}
+	c.Msg.Text = strings.TrimSpace(c.Msg.Text)
 }
