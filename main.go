@@ -10,7 +10,7 @@ const (
 	gozone             = "Gozone"
 	defaultWeatherIcon = "🌞"
 	owmApiKey          = "OWM_API_KEY"
-	helpMessage        = "⛑ %s \n📃 исходник: https://github.com/Gasoid/regular-go-bot"
+	helpMessage        = "⛑ ### Справка по командам ###\n%s \n📃 исходник: https://github.com/Gasoid/regular-go-bot"
 	// name, weather.description, main.temp, wind.speed
 	weatherTmpl     = `📍 %s, %s🌡 %.1fC, 🌬 %.1fm/s`
 	currencyMsgTmpl = `
