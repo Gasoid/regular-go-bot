@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"net/http"
@@ -15,40 +15,15 @@ import (
 	"github.com/Gasoid/workalendar/europe/germany/bavaria"
 	"github.com/Gasoid/workalendar/europe/russia"
 	"github.com/asvvvad/exchange"
-	owm "github.com/briandowns/openweathermap"
 	"github.com/goombaio/namegenerator"
 	cbr "github.com/matperez/go-cbr-client"
 	"github.com/thanhpk/randstr"
 )
 
-const (
-	currencyMsgTmpl = `
-**КУРСЫ ВАЛЮТ**
-🏛 ЦБ РФ:
-$: %.2f руб %s
-€: %.2f руб %s
-
-FOREX:
-$: %.2f руб
-€: %.2f руб
-
-🎲 CRYPTO:
-BTC: %.2f eur
-`
-	// name, weather.description, main.temp, wind.speed
-	weatherTmpl = `📍 %s, %s🌡 %.1fC, 🌬 %.1fm/s`
-	tokenLen    = 20
-)
-
-var (
-	weatherIcons = map[int]string{
-		2: "⚡️",
-		3: "☔️",
-		5: "🌧",
-		6: "❄️",
-		8: "🌤",
-	}
-)
+// func timer(c *BotContext) {
+// 	c.Text()
+// 	c.Msg.
+// }
 
 func encB64(c *BotContext) {
 	arg := c.Update.Message.CommandArguments()
@@ -66,12 +41,12 @@ func decB64(c *BotContext) {
 		c.Text("🧨 no arguments, please send base64 string")
 		return
 	}
-	text, err := b64.StdEncoding.DecodeString(arg)
+	text, err := b64.StdEncoding.DecodeString(strings.TrimSpace(arg))
 	if err != nil {
 		c.Text("🧨 it is not base64 string")
 		return
 	}
-	c.Text("```%s```", text)
+	c.Text("```%s```", string(text))
 }
 
 func randomizer(c *BotContext) {
@@ -99,38 +74,27 @@ func randomizer(c *BotContext) {
 
 func weather(c *BotContext) {
 	var (
-		icon string
-		ok   bool
 		text string
 	)
-	apiKey := os.Getenv("OWM_API_KEY")
-	w, err := owm.NewCurrent("C", "ru", apiKey)
-	if err != nil {
-		log.Println("couldn't load weather", err)
-		return
-	}
+	arg := c.Update.Message.CommandArguments()
 	cities := []string{"Saratov, RU", "Wuerzburg, DE", "Moscow, RU"}
-
+	if arg != "" {
+		cities = []string{arg}
+	}
 	for _, city := range cities {
-		w.CurrentByName(city)
-		wDescr := ""
-		for _, wW := range w.Weather {
-			if wW.Description == "" {
-				continue
-			}
-			if icon, ok = weatherIcons[wW.ID/100]; !ok {
-				icon = "🌞"
-			}
-			wDescr = fmt.Sprintf("%s%s%s ", wDescr, icon, wW.Description)
+		description, err := getWeather(city)
+		if err != nil {
+			log.Println("couldn't get weather", err)
+			c.Text("🧨 it doesn't look like a city name?!")
+			return
 		}
-		description := fmt.Sprintf(weatherTmpl, w.Name, wDescr, w.Main.Temp, w.Wind.Speed)
-		text = fmt.Sprintf("%s%s\n", text, description)
+		text = fmt.Sprintf("%s%s\n", text, *description)
 	}
 	c.Text(text)
 }
 
 func chatInfo(c *BotContext) {
-	c.Text("⚙️ ChatID: %d\nYour UserID: %d", c.Msg.ChatID, c.Update.Message.From.ID)
+	c.Text("⚙️ ChatID: %d Your UserID: %d", c.Msg.ChatID, c.Update.Message.From.ID)
 }
 
 func holiday(c *BotContext) {
@@ -248,7 +212,8 @@ func joke(c *BotContext) {
 }
 
 func help(c *BotContext) {
-	c.Text(helpMessage)
+	text := strings.Join(helps, "\n")
+	c.Text(helpMessage, text)
 }
 
 func estimation(c *BotContext) {

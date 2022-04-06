@@ -73,8 +73,11 @@ func (b *Bot) Flush(c *BotContext) {
 	}
 }
 
-func (b *Bot) Command(cmd string, f func(c *BotContext)) {
+func (b *Bot) Command(cmd string, f func(c *BotContext), help string) {
 	b.commands[cmd] = f
+	if help != "" {
+		helps = append(helps, fmt.Sprintf("📌 %s - %s", cmd, help))
+	}
 }
 
 func (b *Bot) HandleCommand(update *tgbotapi.Update) {
