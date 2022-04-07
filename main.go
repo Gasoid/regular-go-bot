@@ -10,11 +10,11 @@ const (
 	gozone             = "Gozone"
 	defaultWeatherIcon = "🌞"
 	owmApiKey          = "OWM_API_KEY"
-	helpMessage        = "⛑ ### Справка по командам ###\n%s \n📃 исходник: https://github.com/Gasoid/regular-go-bot"
+	helpMessage        = "⛑ *Справка по командам* \n%s \n📃 исходник: https://github.com/Gasoid/regular-go-bot"
 	// name, weather.description, main.temp, wind.speed
 	weatherTmpl     = `📍 %s, %s🌡 %.1fC, 🌬 %.1fm/s`
 	currencyMsgTmpl = `
-**КУРСЫ ВАЛЮТ**
+*КУРСЫ ВАЛЮТ*
 🏛 ЦБ РФ:
 $: %.2f руб %s
 €: %.2f руб %s
@@ -54,7 +54,9 @@ func main() {
 	bot.Command("random", randomizer, "randomizer")
 	bot.Command("b64encode", encB64, "the command encodes string to base64")
 	bot.Command("b64decode", decB64, "the command decodes base64 string")
+	bot.Command("timer", timer, "will notify you in N minute, ex: /timer 10")
 	go runEndpoint()
+	go bot.HandleNotifications()
 	for update := range updates {
 		if update.Message == nil {
 			continue

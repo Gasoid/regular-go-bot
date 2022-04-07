@@ -11,16 +11,18 @@ import (
 )
 
 type BotContext struct {
-	Update *tgbotapi.Update
-	Msg    *tgbotapi.MessageConfig
-	Action tgbotapi.Chattable
+	Update        *tgbotapi.Update
+	Msg           *tgbotapi.MessageConfig
+	Action        tgbotapi.Chattable
+	notifications chan *BotContext
 }
 
 type Bot struct {
-	api      *tgbotapi.BotAPI
-	Context  *BotContext
-	isOzon   bool
-	commands map[string]func(c *BotContext)
+	api           *tgbotapi.BotAPI
+	Context       *BotContext
+	isOzon        bool
+	commands      map[string]func(c *BotContext)
+	notifications chan *BotContext
 }
 
 func New() *Bot {
@@ -37,6 +39,7 @@ func New() *Bot {
 		bot.isOzon = true
 	}
 	bot.commands = make(map[string]func(c *BotContext))
+	bot.notifications = make(chan *BotContext, 1)
 	return bot
 }
 
@@ -56,8 +59,9 @@ func (b *Bot) NewBotContext(update *tgbotapi.Update) *BotContext {
 	msg.ParseMode = tgbotapi.ModeMarkdown
 	msg.DisableWebPagePreview = true
 	return &BotContext{
-		Update: update,
-		Msg:    &msg,
+		Update:        update,
+		Msg:           &msg,
+		notifications: b.notifications,
 	}
 }
 
@@ -111,6 +115,12 @@ func (b *Bot) HandleOzon(update *tgbotapi.Update) {
 	}
 }
 
+func (b *Bot) HandleNotifications() {
+	for c := range b.notifications {
+		b.Flush(c)
+	}
+}
+
 func (c *BotContext) Text(text string, args ...interface{}) {
 	if args != nil {
 		c.Msg.Text = fmt.Sprintf(text, args...)
@@ -118,4 +128,8 @@ func (c *BotContext) Text(text string, args ...interface{}) {
 		c.Msg.Text = text
 	}
 	c.Msg.Text = strings.TrimSpace(c.Msg.Text)
+}
+
+func (c *BotContext) Notify() {
+	c.notifications <- c
 }

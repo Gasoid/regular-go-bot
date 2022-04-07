@@ -20,10 +20,25 @@ import (
 	"github.com/thanhpk/randstr"
 )
 
-// func timer(c *BotContext) {
-// 	c.Text()
-// 	c.Msg.
-// }
+func timer(c *BotContext) {
+	arg := c.Update.Message.CommandArguments()
+	if arg == "" {
+		c.Text("🧨 please provide argument(minutes), e.g.: /timer 5")
+		return
+	}
+	delay, err := strconv.Atoi(arg)
+	if err != nil {
+		log.Println("couldn't convert arg to delay:", err)
+		c.Text("🧨 couldn't convert your input to minute")
+		return
+	}
+	c.Text("⏲ Set timer to %d minutes", delay)
+	go func() {
+		time.Sleep(time.Duration(delay) * time.Minute)
+		c.Text("🔔 Timer (%d min) has finished", delay)
+		c.Notify()
+	}()
+}
 
 func encB64(c *BotContext) {
 	arg := c.Update.Message.CommandArguments()
@@ -32,7 +47,7 @@ func encB64(c *BotContext) {
 		return
 	}
 	enc := b64.StdEncoding.EncodeToString([]byte(arg))
-	c.Text("```%s```", enc)
+	c.Text("`%s`", enc)
 }
 
 func decB64(c *BotContext) {
@@ -46,7 +61,7 @@ func decB64(c *BotContext) {
 		c.Text("🧨 it is not base64 string")
 		return
 	}
-	c.Text(string(text))
+	c.Text("`%s`", string(text))
 }
 
 func randomizer(c *BotContext) {

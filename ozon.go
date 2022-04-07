@@ -32,6 +32,7 @@ func checkOzon(c *BotContext) {
 			}
 			c.Msg.Text = fmt.Sprintf("%s сколько будет 1 + %d = ? у тебя 2 минуты на ответ. Затем, пожалуйста, прочитай шапку группы!", mention, answer)
 			go func(ID int64, chatID int64) {
+				defer c.Notify()
 				time.Sleep(2 * time.Minute)
 				if _, ok := newMembersID[ID]; !ok {
 					return
@@ -40,8 +41,6 @@ func checkOzon(c *BotContext) {
 				conf.ChatID = chatID
 				conf.UserID = ID
 				c.Action = &conf
-				//c.api.Send(conf)
-
 				delete(newMembersID, ID)
 			}(member.ID, c.Update.Message.Chat.ID)
 		}
