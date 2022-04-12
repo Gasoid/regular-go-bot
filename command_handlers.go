@@ -122,8 +122,10 @@ func holiday(c *BotContext) {
 		holidayBavaria, err := bavaria.GetHoliday(now)
 		nextHoliday := russia.NextHoliday(now)
 		b := bavaria.NextHoliday(now)
-		if b.Day.Sub(nextHoliday.Day).Hours() < 0 {
+		if nextHoliday != nil && b != nil && b.Day.Sub(nextHoliday.Day).Hours() < 0 {
 			nextHoliday = b
+		} else {
+			c.Text("Нету праздников сегодня")
 		}
 		if err != nil {
 			c.Text("Нету праздников сегодня. Следующий праздник: %s", nextHoliday.Name)
