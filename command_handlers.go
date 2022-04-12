@@ -126,6 +126,7 @@ func holiday(c *BotContext) {
 			nextHoliday = b
 		} else {
 			c.Text("Нету праздников сегодня")
+			return
 		}
 		if err != nil {
 			c.Text("Нету праздников сегодня. Следующий праздник: %s", nextHoliday.Name)
