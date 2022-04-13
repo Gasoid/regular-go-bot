@@ -7,6 +7,7 @@ ADD *.go /code/
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o /code/bot .
 
 FROM alpine:3.6
+EXPOSE 8080
 WORKDIR /root/
 RUN apk --no-cache --update add bash curl less jq openssl
 COPY --from=builder /code/bot /root/

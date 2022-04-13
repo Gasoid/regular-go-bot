@@ -56,6 +56,7 @@ func main() {
 	bot.Command("b64decode", decB64, "the command decodes base64 string")
 	bot.Command("timer", timer, "will notify you in N minute, ex: /timer 10")
 	go runEndpoint()
+	initMetrics()
 	go bot.HandleNotifications()
 	for update := range updates {
 		if update.Message == nil {

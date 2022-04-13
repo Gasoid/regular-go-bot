@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 type BotContext struct {
@@ -30,7 +31,8 @@ func New() *Bot {
 	if err != nil {
 		log.Fatal("unexpected error:", err)
 	}
-	api.Debug = true
+	// Disable logging
+	//api.Debug = true
 	log.Printf("Authorized on account %s", api.Self.UserName)
 	bot := &Bot{
 		api: api,
@@ -101,6 +103,7 @@ func (b *Bot) HandleCommand(update *tgbotapi.Update) {
 	c := b.NewBotContext(update)
 	if f, ok := b.commands[update.Message.Command()]; ok {
 		f(c)
+		commandExecutions.With(prometheus.Labels{"command": update.Message.Command()}).Inc()
 	} else {
 		notFound(c)
 	}
@@ -120,6 +123,14 @@ func (b *Bot) HandleNotifications() {
 		b.Flush(c)
 	}
 }
+
+// func (b *Bot) listCommands() []string {
+// 	commands := make([]string, len(b.commands))
+// 	for c := range b.commands {
+// 		commands = append(commands, c)
+// 	}
+// 	return commands
+// }
 
 func (c *BotContext) Text(text string, args ...interface{}) {
 	if args != nil {

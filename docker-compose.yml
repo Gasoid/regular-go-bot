@@ -4,6 +4,8 @@ services:
   bot:
     image: ghcr.io/gasoid/regular-go-bot:latest
     restart: always
+    # ports:
+    #   - 8080:8080
     # environment:
     #   - GIST_LOGS_URL
     #   - TOKEN
