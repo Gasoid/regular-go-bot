@@ -18,7 +18,7 @@ type TelegramMessenger struct {
 }
 
 func (t *TelegramMessenger) Updates() bot.Update {
-	return &tgUpdate{update: <-t.updateCh}
+	return &tgUpdate{update: <-t.updateCh, api: t.api}
 }
 
 func (t *TelegramMessenger) BanUser(chatID, userID int64) {
