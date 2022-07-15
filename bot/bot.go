@@ -12,6 +12,22 @@ const (
 	UnknownUpdateType UpdateType = "unknown"
 )
 
+type Help struct {
+	commandList []string
+}
+
+func (h *Help) Add(cmd, text string) {
+	h.commandList = append(h.commandList, fmt.Sprintf("- /%s: %s", cmd, text))
+}
+
+func (h *Help) List() []string {
+	return h.commandList
+}
+
+func NewHelp() *Help {
+	return &Help{commandList: []string{}}
+}
+
 type UpdateType string
 
 type MetricsExporter interface {
@@ -61,14 +77,14 @@ type Bot struct {
 	commands     map[string]func(c *BotContext)
 	messenger    Messenger
 	newMembersID map[int64]int
-	helps        *[]string
+	help         *Help
 }
 
-func New(messenger Messenger, helps *[]string, newMembersID map[int64]int) *Bot {
+func New(messenger Messenger, help *Help, newMembersID map[int64]int) *Bot {
 	bot := &Bot{
 		messenger:    messenger,
 		commands:     make(map[string]func(c *BotContext)),
-		helps:        helps,
+		help:         help,
 		newMembersID: newMembersID,
 		checkers:     []func(c *BotContext){},
 	}
@@ -114,8 +130,7 @@ func (b *Bot) BanUser(chatID int64, userID int64) {
 func (b *Bot) Command(cmd string, f func(c *BotContext), help string) {
 	b.commands[cmd] = f
 	if help != "" {
-		newHelps := append(*b.helps, fmt.Sprintf("- /%s: %s", cmd, help))
-		b.helps = &newHelps
+		b.help.Add(cmd, help)
 	}
 }
 

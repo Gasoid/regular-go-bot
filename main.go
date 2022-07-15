@@ -16,7 +16,7 @@ const (
 )
 
 func main() {
-	helps := &[]string{}
+	help := bot.NewHelp()
 	newMembersID := map[int64]int{}
 	t, err := telegram.New(os.Getenv(token))
 	if err != nil {
@@ -24,8 +24,8 @@ func main() {
 		return
 	}
 	httpEndpoint()
-	bot := bot.New(t, helps, newMembersID)
-	bot.Command("help", help(helps), "помощь по командам")
+	bot := bot.New(t, help, newMembersID)
+	bot.Command("help", helpCmd(help), "помощь по командам")
 	bot.Command("estimation", estimation, "")
 	bot.Command("changelog", changelog(os.Getenv(gistNewsURL)), "")
 	bot.Command("currency", currency, "курс валют")

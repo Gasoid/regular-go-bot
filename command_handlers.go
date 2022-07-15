@@ -266,10 +266,10 @@ func changelog(gistUrl string) func(c *bot.BotContext) {
 	}
 }
 
-func help(helps *[]string) func(c *bot.BotContext) {
+func helpCmd(help *bot.Help) func(c *bot.BotContext) {
 	helpMessage := "⛑ *Справка по командам* \n%s \n📃 исходник: https://github.com/Gasoid/regular-go-bot"
 	return func(c *bot.BotContext) {
-		text := strings.Join(*helps, "\n")
+		text := strings.Join(help.List(), "\n")
 		c.Text(helpMessage, text)
 	}
 }
