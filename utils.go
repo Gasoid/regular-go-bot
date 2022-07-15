@@ -62,7 +62,10 @@ func getWeather(cityName string, owmApiKey string) (*string, error) {
 		log.Println("couldn't load weather", err)
 		return nil, fmt.Errorf("couldn't load weather %w", err)
 	}
-	w.CurrentByName(cityName)
+	err = w.CurrentByName(cityName)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't load weather %w", err)
+	}
 	wDescr := ""
 	for _, wW := range w.Weather {
 		if wW.Description == "" {
