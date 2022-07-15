@@ -1,0 +1,26 @@
+name: Linter checks
+
+on:
+  push:
+    # paths:
+    #   - '*.go'
+    #   - '**/*.go'
+    branches-ignore:
+      - master
+
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+
+jobs:
+  golanglint:
+    name: Linter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: mkdir build && touch build/index.html
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.46

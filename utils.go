@@ -5,11 +5,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 
 	owm "github.com/briandowns/openweathermap"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 var (
@@ -20,10 +18,15 @@ var (
 		6: "❄️",
 		8: "🌤",
 	}
+	phrases = map[string]string{
+		"github":                  "github",
+		"https://play.golang.org": "play",
+		"https://ozon":            "ozon",
+	}
 )
 
-func getLogs() string {
-	resp, err := http.Get(os.Getenv(gistNewsURL))
+func getLogs(gistNewsURL string) string {
+	resp, err := http.Get(gistNewsURL)
 	if err != nil {
 		log.Printf("couldn't retrieve news %v", err)
 		return "не могу получить новости"
@@ -37,22 +40,24 @@ func getLogs() string {
 	return string(body)
 }
 
-func findKeyPhrase(message *tgbotapi.Message) string {
+func findKeyPhrase(message string) string {
 	for k, v := range phrases {
-		if strings.Contains(message.Text, k) && !strings.Contains(message.Text, "gasoid") {
+		if strings.Contains(message, k) && !strings.Contains(message, "gasoid") {
 			return v
 		}
 	}
 	return ""
 }
 
-func getWeather(cityName string) (*string, error) {
+func getWeather(cityName string, owmApiKey string) (*string, error) {
 	var (
 		icon string
 		ok   bool
+		// name, weather.description, main.temp, wind.speed
+		weatherTmpl        = `📍 %s, %s🌡 %.1fC, 🌬 %.1fm/s`
+		defaultWeatherIcon = "🌞"
 	)
-	apiKey := os.Getenv(owmApiKey)
-	w, err := owm.NewCurrent("C", "ru", apiKey)
+	w, err := owm.NewCurrent("C", "ru", owmApiKey)
 	if err != nil {
 		log.Println("couldn't load weather", err)
 		return nil, fmt.Errorf("couldn't load weather %w", err)

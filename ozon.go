@@ -5,52 +5,50 @@ import (
 	"math/rand"
 	"time"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	bot "github.com/Gasoid/regular-go-bot/bot"
 )
 
-func checkOzon(c *BotContext) {
-	switch findKeyPhrase(c.Update.Message) {
-	case "github":
-		c.Msg.Text = "🤔"
-		c.Msg.ReplyToMessageID = c.Update.Message.MessageID
-	case "play":
-		c.Msg.Text = "😁"
-		c.Msg.ReplyToMessageID = c.Update.Message.MessageID
-	case "ozon":
-		c.Msg.Text = "👿"
-		c.Msg.ReplyToMessageID = c.Update.Message.MessageID
-	}
-	if c.Update.Message.NewChatMembers != nil {
-		for _, member := range c.Update.Message.NewChatMembers {
-			//rand.Seed(12000)
-			answer := rand.Intn(200)
-			newMembersID[member.ID] = answer + 1
-			//c.Msg.ReplyToMessageID = c.Update.Message.MessageID
-			mention := fmt.Sprintf("@%s", member.UserName)
-			if member.UserName == "" {
-				mention = fmt.Sprintf("%s %s", member.FirstName, member.LastName)
-			}
-			c.Msg.Text = fmt.Sprintf("%s сколько будет 1 + %d = ? у тебя 2 минуты на ответ. Затем, пожалуйста, прочитай шапку группы!", mention, answer)
-			go func(ID int64, chatID int64) {
-				defer c.Notify()
-				time.Sleep(2 * time.Minute)
-				if _, ok := newMembersID[ID]; !ok {
-					return
-				}
-				conf := tgbotapi.BanChatMemberConfig{}
-				conf.ChatID = chatID
-				conf.UserID = ID
-				c.Action = &conf
-				delete(newMembersID, ID)
-			}(member.ID, c.Update.Message.Chat.ID)
+func ozon(newMembersID map[int64]int) func(c *bot.BotContext) {
+	return func(c *bot.BotContext) {
+		if c.ChatTitle != "Gozone" {
+			return
 		}
-	}
+		switch findKeyPhrase(c.Message) {
+		case "github":
+			c.Reply("🤔")
+		case "play":
+			c.Reply("😁")
+		case "ozon":
+			c.Reply("👿")
+		}
+		if c.NewChatMembers != nil {
+			for _, member := range c.NewChatMembers {
+				//rand.Seed(12000)
+				answer := rand.Intn(200)
+				newMembersID[member.ID] = answer + 1
+				mention := fmt.Sprintf("@%s", member.Username)
+				if member.Username == "" {
+					mention = fmt.Sprintf("%s %s", member.FirstName, member.LastName)
+				}
+				c.Text("%s сколько будет 1 + %d = ? у тебя 2 минуты на ответ. Затем, пожалуйста, прочитай шапку группы!", mention, answer)
+				c.AnswerFunc(func(b *bot.Bot) {
+					ID := member.ID
+					chatID := c.ChatID
+					time.Sleep(2 * time.Minute)
+					if _, ok := newMembersID[ID]; !ok {
+						return
+					}
+					b.BanUser(chatID, ID)
+					delete(newMembersID, ID)
+				})
+			}
+		}
 
-	if a, ok := newMembersID[c.Update.Message.From.ID]; ok {
-		if c.Update.Message.Text == fmt.Sprint(a) {
-			c.Msg.Text = "По-любому ты сделал задание E!?"
-			c.Msg.ReplyToMessageID = c.Update.Message.MessageID
-			delete(newMembersID, c.Update.Message.From.ID)
+		if a, ok := newMembersID[c.User.ID]; ok {
+			if c.Message == fmt.Sprint(a) {
+				c.Reply("По-любому ты сделал задание E!?")
+				delete(newMembersID, c.User.ID)
+			}
 		}
 	}
 }

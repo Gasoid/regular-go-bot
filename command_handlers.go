@@ -12,6 +12,7 @@ import (
 
 	b64 "encoding/base64"
 
+	bot "github.com/Gasoid/regular-go-bot/bot"
 	"github.com/Gasoid/workalendar/europe/germany/bavaria"
 	"github.com/Gasoid/workalendar/europe/russia"
 	"github.com/asvvvad/exchange"
@@ -20,43 +21,40 @@ import (
 	"github.com/thanhpk/randstr"
 )
 
-func timer(c *BotContext) {
-	arg := c.Update.Message.CommandArguments()
-	if arg == "" {
+func timer(c *bot.BotContext) {
+	if !c.HasArgs() {
 		c.Text("🧨 please provide argument(minutes), e.g.: /timer 5")
 		return
 	}
-	delay, err := strconv.Atoi(arg)
+	delay, err := strconv.Atoi(c.Arg())
 	if err != nil {
 		log.Println("couldn't convert arg to delay:", err)
 		c.Text("🧨 couldn't convert your input to minute")
 		return
 	}
 	c.Text("⏲ Set timer to %d minutes", delay)
-	go func() {
+	c.AnswerFunc(func(b *bot.Bot) {
 		time.Sleep(time.Duration(delay) * time.Minute)
 		c.Text("🔔 Timer (%d min) has finished", delay)
-		c.Notify()
-	}()
+		b.Flush(c)
+	})
 }
 
-func encB64(c *BotContext) {
-	arg := c.Update.Message.CommandArguments()
-	if arg == "" {
+func encB64(c *bot.BotContext) {
+	if !c.HasArgs() {
 		c.Text("🧨 no arguments, please send text")
 		return
 	}
-	enc := b64.StdEncoding.EncodeToString([]byte(arg))
+	enc := b64.StdEncoding.EncodeToString([]byte(c.Arg()))
 	c.Text("`%s`", enc)
 }
 
-func decB64(c *BotContext) {
-	arg := c.Update.Message.CommandArguments()
-	if arg == "" {
+func decB64(c *bot.BotContext) {
+	if !c.HasArgs() {
 		c.Text("🧨 no arguments, please send base64 string")
 		return
 	}
-	text, err := b64.StdEncoding.DecodeString(strings.TrimSpace(arg))
+	text, err := b64.StdEncoding.DecodeString(strings.TrimSpace(c.Arg()))
 	if err != nil {
 		c.Text("🧨 it is not base64 string")
 		return
@@ -64,14 +62,15 @@ func decB64(c *BotContext) {
 	c.Text("`%s`", string(text))
 }
 
-func randomizer(c *BotContext) {
+func randomizer(c *bot.BotContext) {
 	var (
-		len int
-		err error
+		len      int
+		err      error
+		tokenLen = 20
 	)
-	arg := c.Update.Message.CommandArguments()
-	if arg != "" {
-		len, err = strconv.Atoi(arg)
+
+	if c.Arg() != "" {
+		len, err = strconv.Atoi(c.Arg())
 		if err != nil {
 			log.Println("couldn't convert string to int:", err)
 			len = tokenLen
@@ -87,32 +86,33 @@ func randomizer(c *BotContext) {
 	c.Text("🎲 Random phrase: %s\n🪄 Random nick: %s", token, nickName)
 }
 
-func weather(c *BotContext) {
-	var (
-		text string
-	)
-	arg := c.Update.Message.CommandArguments()
-	cities := []string{"Saratov, RU", "Wuerzburg, DE", "Moscow, RU"}
-	if arg != "" {
-		cities = []string{arg}
-	}
-	for _, city := range cities {
-		description, err := getWeather(city)
-		if err != nil {
-			log.Println("couldn't get weather", err)
-			c.Text("🧨 it doesn't look like a city name?!")
-			return
+func weather(apiKey string) func(c *bot.BotContext) {
+	return func(c *bot.BotContext) {
+		var (
+			text string
+		)
+		cities := []string{"Saratov, RU", "Wuerzburg, DE", "Moscow, RU"}
+		if c.Arg() != "" {
+			cities = []string{c.Arg()}
 		}
-		text = fmt.Sprintf("%s%s\n", text, *description)
+		for _, city := range cities {
+			description, err := getWeather(city, apiKey)
+			if err != nil {
+				log.Println("couldn't get weather", err)
+				c.Text("🧨 it doesn't look like a city name?!")
+				return
+			}
+			text = fmt.Sprintf("%s%s\n", text, *description)
+		}
+		c.Text(text)
 	}
-	c.Text(text)
 }
 
-func chatInfo(c *BotContext) {
-	c.Text("⚙️ ChatID: %d Your UserID: %d", c.Msg.ChatID, c.Update.Message.From.ID)
+func chatInfo(c *bot.BotContext) {
+	c.Text("⚙️ ChatID: %d Your UserID: %d", c.ChatID, c.User.ID)
 }
 
-func holiday(c *BotContext) {
+func holiday(c *bot.BotContext) {
 	now := time.Now()
 
 	if russia.IsHoliday(now) {
@@ -136,7 +136,21 @@ func holiday(c *BotContext) {
 	}
 }
 
-func currency(c *BotContext) {
+func currency(c *bot.BotContext) {
+	currencyMsgTmpl := `
+*КУРСЫ ВАЛЮТ*
+🏛 ЦБ РФ:
+$: %.2f руб %s
+€: %.2f руб %s
+
+FOREX:
+$: %.2f руб
+€: %.2f руб
+
+🎲 CRYPTO:
+BTC: %.2f eur
+`
+
 	ex := exchange.New("USD")
 
 	usd, err := ex.ConvertTo("RUB", 1)
@@ -159,14 +173,6 @@ func currency(c *BotContext) {
 	if err != nil {
 		log.Print("exchange got error:", err.Error())
 	}
-	// err = ex.SetBase("ETH")
-	// if err != nil {
-	// 	log.Print("exchange got error:", err.Error())
-	// }
-	// eth, err := ex.ConvertTo("EUR", 1)
-	// if err != nil {
-	// 	log.Print("exchange got error:", err.Error())
-	// }
 	now := time.Now()
 	yesterday := now.AddDate(0, 0, -1)
 	cbrClient := cbr.NewClient()
@@ -204,7 +210,7 @@ func currency(c *BotContext) {
 	c.Text(currencyMsgTmpl, cbrUsd, cbrUsdIcon, cbrEur, cbrEurIcon, usd, eur, btc)
 }
 
-func joke(c *BotContext) {
+func joke(c *bot.BotContext) {
 	reqURL := "https://jokesrv.rubedo.cloud/oneliner"
 	req, err := http.NewRequest("GET", reqURL, nil)
 	if err != nil {
@@ -234,12 +240,8 @@ func joke(c *BotContext) {
 	c.Text(rr.Content)
 }
 
-func help(c *BotContext) {
-	text := strings.Join(helps, "\n")
-	c.Text(helpMessage, text)
-}
-
-func estimation(c *BotContext) {
+func estimation(c *bot.BotContext) {
+	endDate := "Jun 17 2020"
 	msgDuration := ""
 	june17, _ := time.Parse("Jan 02 2006", endDate)
 	if june17.Before(time.Now()) {
@@ -258,10 +260,16 @@ func estimation(c *BotContext) {
 	c.Text("Результаты отбора были объявлены 17 июня. Это было: %v", msgDuration)
 }
 
-func changelog(c *BotContext) {
-	c.Text(getLogs())
+func changelog(gistUrl string) func(c *bot.BotContext) {
+	return func(c *bot.BotContext) {
+		c.Text(getLogs(gistUrl))
+	}
 }
 
-func notFound(c *BotContext) {
-	c.Text("Хм, не знаю такую команду")
+func help(helps []string) func(c *bot.BotContext) {
+	helpMessage := "⛑ *Справка по командам* \n%s \n📃 исходник: https://github.com/Gasoid/regular-go-bot"
+	return func(c *bot.BotContext) {
+		text := strings.Join(helps, "\n")
+		c.Text(helpMessage, text)
+	}
 }
