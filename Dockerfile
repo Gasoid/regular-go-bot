@@ -3,7 +3,7 @@ WORKDIR /code
 ADD go.mod /code/
 ADD go.sum /code/
 RUN go mod download
-ADD *.go /code/
+ADD ./ /code/
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o /code/bot .
 
 FROM alpine:3.6
