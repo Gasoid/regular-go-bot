@@ -61,10 +61,10 @@ type Bot struct {
 	commands     map[string]func(c *BotContext)
 	messenger    Messenger
 	newMembersID map[int64]int
-	helps        []string
+	helps        *[]string
 }
 
-func New(messenger Messenger, helps []string, newMembersID map[int64]int) *Bot {
+func New(messenger Messenger, helps *[]string, newMembersID map[int64]int) *Bot {
 	bot := &Bot{
 		messenger:    messenger,
 		commands:     make(map[string]func(c *BotContext)),
@@ -114,7 +114,8 @@ func (b *Bot) BanUser(chatID int64, userID int64) {
 func (b *Bot) Command(cmd string, f func(c *BotContext), help string) {
 	b.commands[cmd] = f
 	if help != "" {
-		b.helps = append(b.helps, fmt.Sprintf("- /%s: %s", cmd, help))
+		newHelps := append(*b.helps, fmt.Sprintf("- /%s: %s", cmd, help))
+		b.helps = &newHelps
 	}
 }
 

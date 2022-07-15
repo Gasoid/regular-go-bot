@@ -16,7 +16,7 @@ const (
 )
 
 func main() {
-	helps := []string{}
+	helps := &[]string{}
 	newMembersID := map[int64]int{}
 	t, err := telegram.New(os.Getenv(token))
 	if err != nil {
