@@ -46,7 +46,10 @@ func (tu *tgUpdate) Answer(text string, isReply bool, messageID int) {
 		// log.Println(err.Error())
 		msg.ParseMode = ""
 		log.Println("trying to send it without markdown")
-		tu.api.Send(msg)
+		_, err = tu.api.Send(msg)
+		if err != nil {
+			log.Println(err.Error())
+		}
 	}
 }
 
