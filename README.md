@@ -15,5 +15,16 @@
 - b64decode
 
 
+## Metrics
+Prometheus metrics are exposed on 8080 port: http://localhost:8080/metrics
+
+```bash
+curl http://localhost:8080/metrics
+```
+
+## Health endpoint
+http://localhost:8080/health
+
+
 ## License
 This program is published under the terms of the MIT License. Please check the LICENSE file for more details.
