@@ -1,4 +1,4 @@
-[![ci](https://github.com/Gasoid/regular-go-bot/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Gasoid/regular-go-bot/actions/workflows/ci.yml)
+[![CI](https://github.com/Gasoid/regular-go-bot/actions/workflows/ci.yml/badge.svg)](https://github.com/Gasoid/regular-go-bot/actions/workflows/ci.yml)
 
 ## Command list
 
