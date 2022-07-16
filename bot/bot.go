@@ -2,6 +2,7 @@ package bot
 
 import (
 	"fmt"
+	"log"
 	"runtime/debug"
 	"strings"
 )
@@ -156,10 +157,6 @@ func (b *Bot) HandleMessage(c *BotContext) {
 	}
 }
 
-func (b *Bot) HandleNotifications() {
-
-}
-
 func (c *BotContext) Text(text string, args ...interface{}) {
 	if args != nil {
 		c.answer = fmt.Sprintf(text, args...)
@@ -196,7 +193,8 @@ func notFound(c *BotContext) {
 
 func doRecover() {
 	if r := recover(); r != nil {
-		fmt.Println("Bot got unexpected error")
-		fmt.Println("stacktrace from panic: \n" + string(debug.Stack()))
+		log.Println("Bot got unexpected error")
+		log.Println("stacktrace from panic:")
+		log.Println(string(debug.Stack()))
 	}
 }
