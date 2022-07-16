@@ -1,12 +1,6 @@
 name: Linter checks
 
-on:
-  push:
-    # paths:
-    #   - '*.go'
-    #   - '**/*.go'
-    branches-ignore:
-      - master
+on: [push]
 
 
 env:
