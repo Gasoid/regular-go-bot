@@ -15,6 +15,15 @@
 - b64decode
 
 
+## Settings / Env variables
+You have to provide 3 env variables:
+
+- TOKEN - telegram token
+- GIST_LOGS_URL - gist url
+- OWM_API_KEY - api key for weather command
+
+
+
 ## Metrics
 Prometheus metrics are exposed on 8080 port: http://localhost:8080/metrics
 
