@@ -22,6 +22,10 @@ You have to provide 3 env variables:
 - GIST_LOGS_URL - gist url
 - OWM_API_KEY - api key for weather command
 
+## How it works
+
+<img width="511" alt="Screenshot 2022-07-17 at 21 12 16" src="https://user-images.githubusercontent.com/833157/179421331-6f380348-994a-433f-8475-415134d8d169.png">
+
 
 
 ## Metrics
@@ -32,8 +36,25 @@ curl http://localhost:8080/metrics
 ```
 
 ## Health endpoint
-http://localhost:8080/health
+url: http://localhost:8080/health
 
+```bash
+curl http://localhost:8080/health
+```
+
+
+## Compilation routine
+
+```
+go mod download
+go build ./
+```
+
+or
+
+```
+docker build -t bot:test ./
+```
 
 ## License
 This program is published under the terms of the MIT License. Please check the LICENSE file for more details.
