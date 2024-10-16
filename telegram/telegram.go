@@ -55,7 +55,7 @@ func Run() {
 }
 
 func helpHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	if update == nil || update.Message == nil {
+	if update == nil || update.Message == nil || update.Message.Text == "" {
 		return
 	}
 	b.SendMessage(ctx, &bot.SendMessageParams{
