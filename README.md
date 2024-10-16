@@ -18,7 +18,7 @@
 ## Settings / Env variables
 You have to provide 3 env variables:
 
-- TOKEN - telegram token
+- BOT_TOKEN - telegram token
 - GIST_LOGS_URL - gist url
 - OWM_API_KEY - api key for weather command
 
