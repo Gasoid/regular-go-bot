@@ -54,6 +54,13 @@ func Run() {
 				metrics.CommandInc(c.Name())
 			})
 	}
+
+	commandList := []models.BotCommand{}
+	for _, c := range commands.List() {
+		commandList = append(commandList, models.BotCommand{Command: c.Name(), Description: c.Help()})
+	}
+	b.SetMyCommands(ctx, &bot.SetMyCommandsParams{Commands: commandList, Scope: &models.BotCommandScopeAllPrivateChats{}})
+
 	b.Start(ctx)
 }
 
@@ -63,6 +70,6 @@ func helpHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	}
 	b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: update.Message.Chat.ID,
-		Text:   "help...",
+		Text:   commands.Help(),
 	})
 }

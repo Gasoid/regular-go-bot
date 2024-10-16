@@ -1,5 +1,7 @@
 package commands
 
+import "fmt"
+
 type Command interface {
 	Handler(string, func(string)) error
 	Help() string
@@ -16,4 +18,12 @@ func Register(command Command) {
 
 func List() []Command {
 	return commands
+}
+
+func Help() string {
+	text := ""
+	for _, c := range commands {
+		text = fmt.Sprintf("%s/%s - %s\n", text, c.Name(), c.Help())
+	}
+	return text
 }
