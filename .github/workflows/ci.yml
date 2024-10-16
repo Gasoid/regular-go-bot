@@ -13,16 +13,15 @@ concurrency:
 
 
 jobs:
-  lint:
+  golanglint:
     name: Linter
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: mkdir build && touch build/index.html
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.46
+          version: v1.56
 
   build-and-push-image:
     runs-on: ubuntu-latest

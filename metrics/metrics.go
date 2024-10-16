@@ -15,13 +15,11 @@ func Handler() http.Handler {
 	return promhttp.Handler()
 }
 
-type MetricsExporter struct{}
-
-func (m *MetricsExporter) CommandInc(command string) {
+func CommandInc(command string) {
 	commandExecutions.With(prometheus.Labels{"command": command}).Inc()
 }
 
-func New() *MetricsExporter {
+func init() {
 	commandExecutions = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "command_executions_total",
@@ -30,5 +28,4 @@ func New() *MetricsExporter {
 		[]string{"command"},
 	)
 	prometheus.MustRegister(commandExecutions)
-	return &MetricsExporter{}
 }
