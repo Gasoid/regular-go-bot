@@ -9,6 +9,7 @@ import (
 	"log/slog"
 
 	"github.com/Gasoid/regular-go-bot/commands"
+	"github.com/Gasoid/regular-go-bot/metrics"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 )
@@ -49,6 +50,8 @@ func Run() {
 					slog.Error("handler failed", "err", err)
 					return
 				}
+
+				metrics.CommandInc(c.Name())
 			})
 	}
 	b.Start(ctx)
