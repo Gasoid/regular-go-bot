@@ -1,4 +1,4 @@
-package joke
+package openai
 
 import (
 	"log/slog"

@@ -10,6 +10,7 @@ import (
 
 	"github.com/Gasoid/regular-go-bot/commands"
 	"github.com/Gasoid/regular-go-bot/metrics"
+	"github.com/Gasoid/regular-go-bot/parsers"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 )
@@ -61,7 +62,6 @@ func Run() {
 						})
 					},
 				}
-
 				err := c.Handler(s, callback)
 				if err != nil {
 					slog.Error("handler failed", "err", err)
@@ -82,4 +82,28 @@ func Run() {
 }
 
 func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+	if update.Message.Voice != nil {
+		f, err := b.GetFile(ctx, &bot.GetFileParams{
+			FileID: update.Message.Voice.FileID,
+		})
+		if err != nil {
+			slog.Error("b.GetFile", "err", err)
+			return
+		}
+
+		for _, p := range parsers.ListVoiceParsers() {
+			p.Handler(f.FilePath, parsers.Callback{
+				ReplyMessage: func(text string) {
+					b.SendMessage(ctx, &bot.SendMessageParams{
+						ChatID: update.Message.Chat.ID,
+						Text:   text,
+						ReplyParameters: &models.ReplyParameters{
+							MessageID: update.Message.ID,
+							ChatID:    update.Message.Chat.ID,
+						},
+					})
+				},
+			})
+		}
+	}
 }
