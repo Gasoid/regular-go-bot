@@ -2,6 +2,7 @@ package parsers
 
 type Parser interface {
 	Handler(string, Callback) error
+	Name() string
 }
 
 var (

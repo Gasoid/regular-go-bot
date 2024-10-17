@@ -1,6 +1,7 @@
 package speech
 
 import (
+	"log/slog"
 	"os"
 
 	"github.com/Gasoid/regular-go-bot/parsers"
@@ -16,7 +17,13 @@ const (
 
 type Command struct{}
 
+func (c *Command) Name() string {
+	return "speech-to-voice"
+}
+
 func (c *Command) Handler(filepath string, callback parsers.Callback) error {
+	slog.Debug("Speech", "msg", "started")
+
 	client := openai.NewClient(os.Getenv(openaiBotToken))
 	ctx := context.Background()
 
@@ -30,6 +37,8 @@ func (c *Command) Handler(filepath string, callback parsers.Callback) error {
 	}
 
 	callback.ReplyMessage(resp.Text)
+
+	slog.Debug("Speech", "msg", "finished")
 	return nil
 }
 
