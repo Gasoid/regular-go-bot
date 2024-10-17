@@ -13,8 +13,8 @@ import (
 
 const (
 	openaiBotToken = "OPENAI_TOKEN"
-	maxTokens      = 100
-	preMessage     = "You answer with no more than 100 words, should be in Russian language"
+	maxTokens      = 200
+	preMessage     = "You answer with no more than 200 words, should be in Russian language"
 )
 
 type Command struct{}
