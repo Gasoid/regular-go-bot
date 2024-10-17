@@ -37,12 +37,29 @@ func Run() {
 		b.RegisterHandler(bot.HandlerTypeMessageText, commandPrefix, bot.MatchTypePrefix,
 			func(ctx context.Context, b *bot.Bot, update *models.Update) {
 				s, _ := strings.CutPrefix(update.Message.Text, commandPrefix)
+				callback := commands.Callback{
+					SendMessage: func(arg string) {
+						b.SendMessage(ctx, &bot.SendMessageParams{
+							ChatID: update.Message.Chat.ID,
+							Text:   arg,
+						})
+					},
+					SendVideo: func(filePath string) {
+						f, err := os.Open(filePath)
+						if err != nil {
+							slog.Error("file not found", "err", err)
+							return
+						}
+						defer f.Close()
 
-				callback := func(s string) {
-					b.SendMessage(ctx, &bot.SendMessageParams{
-						ChatID: update.Message.Chat.ID,
-						Text:   s,
-					})
+						b.SendVideo(ctx, &bot.SendVideoParams{
+							ChatID: update.Message.Chat.ID,
+							Video: &models.InputFileUpload{
+								Data:     f,
+								Filename: "video",
+							},
+						})
+					},
 				}
 
 				err := c.Handler(s, callback)
