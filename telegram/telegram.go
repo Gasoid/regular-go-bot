@@ -102,6 +102,7 @@ func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 			slog.Error("downloadVoice", "err", err)
 			return
 		}
+		defer os.Remove(path)
 
 		for _, p := range parsers.ListVoiceParsers() {
 			err := p.Handler(path, parsers.Callback{
