@@ -22,7 +22,7 @@ func (c *Command) Help() string {
 	return "the command drops a joke"
 }
 
-func (c *Command) Handler(s string, callback func(string)) error {
+func (c *Command) Handler(s string, callback commands.Callback) error {
 	req, err := http.NewRequest("GET", jokeUrl, nil)
 	if err != nil {
 		log.Println("joke error:", err.Error())
@@ -47,7 +47,7 @@ func (c *Command) Handler(s string, callback func(string)) error {
 		return err
 
 	}
-	callback(rr.Content)
+	callback.SendMessage(rr.Content)
 	return nil
 }
 

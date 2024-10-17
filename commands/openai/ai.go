@@ -1,4 +1,4 @@
-package joke
+package openai
 
 import (
 	"log/slog"
@@ -27,7 +27,7 @@ func (c *Command) Help() string {
 	return "ai answers"
 }
 
-func (c *Command) Handler(message string, callback func(string)) error {
+func (c *Command) Handler(message string, callback commands.Callback) error {
 	client := openai.NewClient(os.Getenv(openaiBotToken))
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
@@ -52,7 +52,7 @@ func (c *Command) Handler(message string, callback func(string)) error {
 		return nil
 	}
 
-	callback(resp.Choices[0].Message.Content)
+	callback.SendMessage(resp.Choices[0].Message.Content)
 	return nil
 }
 

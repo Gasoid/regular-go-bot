@@ -14,8 +14,8 @@ func (c *Command) Help() string {
 	return "the command prints help"
 }
 
-func (c *Command) Handler(s string, callback func(string)) error {
-	callback(commands.Help())
+func (c *Command) Handler(s string, callback commands.Callback) error {
+	callback.SendMessage(commands.Help())
 	return nil
 }
 

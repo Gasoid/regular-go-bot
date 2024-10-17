@@ -3,7 +3,7 @@ package commands
 import "fmt"
 
 type Command interface {
-	Handler(string, func(string)) error
+	Handler(string, Callback) error
 	Help() string
 	Name() string
 }
@@ -26,4 +26,10 @@ func Help() string {
 		text = fmt.Sprintf("%s/%s - %s\n", text, c.Name(), c.Help())
 	}
 	return text
+}
+
+type Callback struct {
+	SendMessage  func(text string)
+	SendVideo    func(filePath string)
+	ReplyMessage func(text string)
 }
