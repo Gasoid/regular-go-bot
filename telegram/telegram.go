@@ -23,7 +23,7 @@ func Run() {
 	defer cancel()
 
 	opts := []bot.Option{
-		bot.WithDefaultHandler(helpHandler),
+		bot.WithDefaultHandler(defaultHandler),
 	}
 
 	b, err := bot.New(os.Getenv(telegramBotToken), opts...)
@@ -64,12 +64,5 @@ func Run() {
 	b.Start(ctx)
 }
 
-func helpHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	if update == nil || update.Message == nil || update.Message.Text == "" {
-		return
-	}
-	b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: update.Message.Chat.ID,
-		Text:   commands.Help(),
-	})
+func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 }
