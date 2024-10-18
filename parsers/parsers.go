@@ -23,7 +23,7 @@ func (w *Wrapper) Handler(s string, c Callback) error {
 	start := time.Now()
 	err := w.parser.Handler(s, c)
 	metrics.ParserInc(w.parser.Name(), err)
-	metrics.ParserDuration(w.parser.Name(), time.Now().Sub(start))
+	metrics.ParserDuration(w.parser.Name(), time.Since(start))
 	return err
 }
 

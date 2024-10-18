@@ -14,6 +14,7 @@ var (
 	parserExecutions  *prometheus.CounterVec
 	receivedMessages  *prometheus.CounterVec
 	parserDuration    *prometheus.HistogramVec
+	commandDuration   *prometheus.HistogramVec
 )
 
 func Handler() http.Handler {
@@ -38,6 +39,10 @@ func ParserInc(parser string, err error) {
 
 func ParserDuration(parser string, d time.Duration) {
 	parserDuration.WithLabelValues(parser).Observe(d.Seconds())
+}
+
+func CommandDuration(command string, d time.Duration) {
+	commandDuration.WithLabelValues(command).Observe(d.Seconds())
 }
 
 func MessagesInc(isPrivate bool) {
@@ -69,7 +74,7 @@ func init() {
 		[]string{"is_private"},
 	)
 
-	parserDuration := prometheus.NewHistogramVec(
+	parserDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "parser_duration",
 			Help:    "Duration of parser",
@@ -78,10 +83,20 @@ func init() {
 		[]string{"parser"},
 	)
 
+	commandDuration = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "command_duration",
+			Help:    "Duration of command",
+			Buckets: prometheus.ExponentialBuckets(1, 2, 5),
+		},
+		[]string{"command"},
+	)
+
 	prometheus.MustRegister(
 		commandExecutions,
 		parserExecutions,
 		receivedMessages,
 		parserDuration,
+		commandDuration,
 	)
 }

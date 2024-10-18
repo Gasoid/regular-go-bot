@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/Gasoid/regular-go-bot/metrics"
 )
@@ -21,8 +22,10 @@ type Wrapper struct {
 }
 
 func (w *Wrapper) Handler(s string, c Callback) error {
+	start := time.Now()
 	err := w.command.Handler(s, c)
 	metrics.CommandInc(w.command.Name(), err)
+	metrics.CommandDuration(w.command.Name(), time.Since(start))
 	return err
 }
 
