@@ -55,7 +55,6 @@ func commandHandler(c commands.Command) func(ctx context.Context, b *bot.Bot, up
 }
 
 func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	slog.Debug("voice check", "voice", update.Message.Voice)
 	if update.Message.Voice != nil {
 		f, err := b.GetFile(ctx, &bot.GetFileParams{
 			FileID: update.Message.Voice.FileID,

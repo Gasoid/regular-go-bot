@@ -49,8 +49,8 @@ func init() {
 
 	parserExecutions = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "voice_transcriptions_total",
-			Help: "Number of voice transcriptions",
+			Name: "parser_executions_total",
+			Help: "Number of parser executions",
 		},
 		[]string{"parser", "is_failed"},
 	)
