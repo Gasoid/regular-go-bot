@@ -1,6 +1,11 @@
 package commands
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+
+	"github.com/Gasoid/regular-go-bot/metrics"
+)
 
 type Command interface {
 	Handler(string, Callback) error
@@ -12,8 +17,28 @@ var (
 	commands = []Command{}
 )
 
+type Wrapper struct {
+	command Command
+}
+
+func (w *Wrapper) Handler(s string, c Callback) error {
+	start := time.Now()
+	err := w.command.Handler(s, c)
+	metrics.CommandInc(w.command.Name(), err)
+	metrics.CommandDuration(w.command.Name(), time.Since(start))
+	return err
+}
+
+func (w *Wrapper) Help() string {
+	return w.command.Help()
+}
+
+func (w *Wrapper) Name() string {
+	return w.command.Name()
+}
+
 func Register(command Command) {
-	commands = append(commands, command)
+	commands = append(commands, &Wrapper{command})
 }
 
 func List() []Command {
