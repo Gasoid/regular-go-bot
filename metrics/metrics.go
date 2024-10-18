@@ -3,6 +3,7 @@ package metrics
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -12,6 +13,7 @@ var (
 	commandExecutions *prometheus.CounterVec
 	parserExecutions  *prometheus.CounterVec
 	receivedMessages  *prometheus.CounterVec
+	parserDuration    *prometheus.HistogramVec
 )
 
 func Handler() http.Handler {
@@ -32,6 +34,10 @@ func ParserInc(parser string, err error) {
 			"parser":    parser,
 			"is_failed": strconv.FormatBool(err != nil),
 		}).Inc()
+}
+
+func ParserDuration(parser string, d time.Duration) {
+	parserDuration.WithLabelValues(parser).Observe(d.Seconds())
 }
 
 func MessagesInc(isPrivate bool) {
@@ -63,9 +69,19 @@ func init() {
 		[]string{"is_private"},
 	)
 
+	parserDuration := prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "parser_duration",
+			Help:    "Duration of parser",
+			Buckets: prometheus.ExponentialBuckets(1, 2, 5),
+		},
+		[]string{"parser"},
+	)
+
 	prometheus.MustRegister(
 		commandExecutions,
 		parserExecutions,
 		receivedMessages,
+		parserDuration,
 	)
 }

@@ -1,6 +1,10 @@
 package parsers
 
-import "github.com/Gasoid/regular-go-bot/metrics"
+import (
+	"time"
+
+	"github.com/Gasoid/regular-go-bot/metrics"
+)
 
 type Parser interface {
 	Handler(string, Callback) error
@@ -16,8 +20,10 @@ type Wrapper struct {
 }
 
 func (w *Wrapper) Handler(s string, c Callback) error {
+	start := time.Now()
 	err := w.parser.Handler(s, c)
 	metrics.ParserInc(w.parser.Name(), err)
+	metrics.ParserDuration(w.parser.Name(), time.Now().Sub(start))
 	return err
 }
 
