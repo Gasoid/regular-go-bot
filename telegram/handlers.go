@@ -17,6 +17,10 @@ import (
 	"github.com/go-telegram/bot/models"
 )
 
+const (
+	downloadFileUrl = "https://api.telegram.org/file/bot%s/%s"
+)
+
 func commandHandler(c commands.Command) func(ctx context.Context, b *bot.Bot, update *models.Update) {
 	commandPrefix := "/" + c.Name()
 	return func(ctx context.Context, b *bot.Bot, update *models.Update) {

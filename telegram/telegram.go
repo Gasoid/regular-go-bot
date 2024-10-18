@@ -14,7 +14,6 @@ import (
 
 const (
 	telegramBotToken = "BOT_TOKEN"
-	downloadFileUrl  = "https://api.telegram.org/file/bot%s/%s"
 )
 
 func Run() {
