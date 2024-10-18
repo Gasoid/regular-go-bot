@@ -19,9 +19,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.56
+          version: v1.60
 
   build-and-push-image:
     runs-on: ubuntu-latest
