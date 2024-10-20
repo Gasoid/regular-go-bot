@@ -57,6 +57,7 @@ func (c *Command) Handler(prompt string, callback commands.Callback) error {
 		slog.Error("os.CreateTemp", "err", err)
 		return err
 	}
+	defer os.Remove(file.Name())
 	defer file.Close()
 
 	_, err = io.Copy(file, httpResp.Body)

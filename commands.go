@@ -7,5 +7,5 @@ import (
 	_ "github.com/Gasoid/regular-go-bot/commands/joke"
 	_ "github.com/Gasoid/regular-go-bot/commands/openai"
 	_ "github.com/Gasoid/regular-go-bot/commands/weather"
-	_ "github.com/Gasoid/regular-go-bot/commands/youtube"
+	// _ "github.com/Gasoid/regular-go-bot/commands/youtube"
 )
