@@ -29,6 +29,7 @@ func (c *Command) Handler(s string, callback commands.Callback) error {
 	}
 
 	callback.SendVideo(path)
+	defer os.Remove(path)
 	return nil
 }
 

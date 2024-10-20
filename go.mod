@@ -3,6 +3,7 @@ module github.com/Gasoid/regular-go-bot
 go 1.22
 
 require (
+	github.com/briandowns/openweathermap v0.20.0
 	github.com/go-telegram/bot v1.8.4
 	github.com/kkdai/youtube/v2 v2.10.1
 	github.com/prometheus/client_golang v1.12.1

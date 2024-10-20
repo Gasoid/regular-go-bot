@@ -7,6 +7,7 @@ You have to provide 3 env variables:
 - BOT_TOKEN - telegram token
 - OPENAI_TOKEN - chatgpt token
 - OWM_API_KEY - api key for weather command
+- DEFAULT_WEATHER_CITIES - default cities, e.g. Berlin,Chicago,Los Angeles
 
 ## How it works
 
