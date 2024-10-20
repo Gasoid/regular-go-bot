@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -47,6 +48,21 @@ func commandHandler(c commands.Command) func(ctx context.Context, b *bot.Bot, up
 						Filename: "video",
 					},
 				})
+			},
+			SendPhoto: func(path, caption string) {
+				fileData, err := os.ReadFile(path)
+				if err != nil {
+					slog.Error("file not found", "err", err)
+					return
+				}
+
+				params := &bot.SendPhotoParams{
+					ChatID:  update.Message.Chat.ID,
+					Photo:   &models.InputFileUpload{Filename: "image.png", Data: bytes.NewReader(fileData)},
+					Caption: caption,
+				}
+
+				b.SendPhoto(ctx, params)
 			},
 		}
 

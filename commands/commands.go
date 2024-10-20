@@ -55,6 +55,7 @@ func Help() string {
 
 type Callback struct {
 	SendMessage  func(text string)
+	SendPhoto    func(data, caption string)
 	SendVideo    func(filePath string)
 	ReplyMessage func(text string)
 }
