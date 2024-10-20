@@ -40,7 +40,7 @@ func (c *Command) Help() string {
 func (c *Command) Handler(message string, callback commands.Callback) error {
 	var (
 		text   string
-		cities = []string{}
+		cities []string
 		err    error
 	)
 
