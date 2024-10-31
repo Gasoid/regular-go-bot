@@ -55,11 +55,11 @@ func (c *Command) Handler(coords string, callback parsers.Callback) error {
 		context.Background(),
 		openai.ChatCompletionRequest{
 			Model:               openai.GPT4oMini,
-			MaxCompletionTokens: 200,
+			MaxCompletionTokens: 250,
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    openai.ChatMessageRoleUser,
-					Content: "You provide interesting fact/history about location/place (radius 20Km) with no more than 150 words, should be in Russian language",
+					Content: "You provide interesting fact/history about location/place (radius 20Km) with no more than 150 words, should be in Russian language, please add appropriate emojis",
 				},
 				{
 					Role:    openai.ChatMessageRoleUser,
