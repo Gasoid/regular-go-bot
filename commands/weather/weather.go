@@ -3,23 +3,12 @@ package weather
 import (
 	"errors"
 	"fmt"
-	"log"
 	"log/slog"
 	"os"
 	"strings"
 
 	"github.com/Gasoid/regular-go-bot/commands"
 	owm "github.com/briandowns/openweathermap"
-)
-
-var (
-	weatherIcons = map[int]string{
-		2: "⚡️",
-		3: "☔️",
-		5: "🌧",
-		6: "❄️",
-		8: "🌤",
-	}
 )
 
 const (
@@ -59,7 +48,7 @@ func (c *Command) Handler(message string, callback commands.Callback) error {
 			callback.SendMessage("🧨 it doesn't look like a city name?!")
 			return err
 		}
-		text = fmt.Sprintf("%s%s\n", text, *description)
+		text = fmt.Sprintf("%s%s\n", text, description)
 	}
 	callback.SendMessage(text)
 	return nil
@@ -74,24 +63,23 @@ func getDefaultCities() ([]string, error) {
 	return strings.Split(cities, ","), nil
 }
 
-func (c *Command) getWeather(cityName string, owmApiKey string) (*string, error) {
+func formatWeather(w *owm.CurrentWeatherData) string {
 	var (
 		icon string
 		ok   bool
 		// name, weather.description, main.temp, wind.speed
 		weatherTmpl        = `📍 %s, %s🌡 %.1fC, 🌬 %.1fm/s`
 		defaultWeatherIcon = "🌞"
+		wDescr             = ""
+		weatherIcons       = map[int]string{
+			2: "⚡️",
+			3: "☔️",
+			5: "🌧",
+			6: "❄️",
+			8: "🌤",
+		}
 	)
-	w, err := owm.NewCurrent("C", "ru", owmApiKey)
-	if err != nil {
-		log.Println("couldn't load weather", err)
-		return nil, fmt.Errorf("couldn't load weather %w", err)
-	}
-	err = w.CurrentByName(cityName)
-	if err != nil {
-		return nil, fmt.Errorf("couldn't load weather %w", err)
-	}
-	wDescr := ""
+
 	for _, wW := range w.Weather {
 		if wW.Description == "" {
 			continue
@@ -101,8 +89,22 @@ func (c *Command) getWeather(cityName string, owmApiKey string) (*string, error)
 		}
 		wDescr = fmt.Sprintf("%s%s%s ", wDescr, icon, wW.Description)
 	}
-	description := fmt.Sprintf(weatherTmpl, w.Name, wDescr, w.Main.Temp, w.Wind.Speed)
-	return &description, nil
+
+	return fmt.Sprintf(weatherTmpl, w.Name, wDescr, w.Main.Temp, w.Wind.Speed)
+}
+
+func (c *Command) getWeather(cityName string, owmApiKey string) (string, error) {
+	w, err := owm.NewCurrent("C", "ru", owmApiKey)
+	if err != nil {
+		slog.Error("couldn't load weather", "err", err)
+		return "", fmt.Errorf("couldn't load weather %w", err)
+	}
+	err = w.CurrentByName(cityName)
+	if err != nil {
+		return "", fmt.Errorf("couldn't load weather %w", err)
+	}
+
+	return formatWeather(w), nil
 }
 
 func init() {

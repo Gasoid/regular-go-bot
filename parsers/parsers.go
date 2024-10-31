@@ -12,7 +12,8 @@ type Parser interface {
 }
 
 var (
-	voiceParsers = []Parser{}
+	voiceParsers    = []Parser{}
+	locationParsers = []Parser{}
 )
 
 type Wrapper struct {
@@ -37,6 +38,14 @@ func RegisterVoiceParser(parser Parser) {
 
 func ListVoiceParsers() []Parser {
 	return voiceParsers
+}
+
+func RegisterLocationParser(parser Parser) {
+	locationParsers = append(locationParsers, &Wrapper{parser})
+}
+
+func ListLocationParsers() []Parser {
+	return locationParsers
 }
 
 type Callback struct {

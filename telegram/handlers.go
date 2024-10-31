@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/Gasoid/regular-go-bot/commands"
-	"github.com/Gasoid/regular-go-bot/metrics"
 	"github.com/Gasoid/regular-go-bot/parsers"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
@@ -75,6 +74,26 @@ func commandHandler(c commands.Command) func(ctx context.Context, b *bot.Bot, up
 }
 
 func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+	if update.Message.Location != nil {
+		for _, p := range parsers.ListLocationParsers() {
+			err := p.Handler(fmt.Sprintf("%f,%f", update.Message.Location.Latitude, update.Message.Location.Longitude), parsers.Callback{
+				ReplyMessage: func(text string) {
+					b.SendMessage(ctx, &bot.SendMessageParams{
+						ChatID: update.Message.Chat.ID,
+						Text:   text,
+						ReplyParameters: &models.ReplyParameters{
+							MessageID: update.Message.ID,
+							ChatID:    update.Message.Chat.ID,
+						},
+					})
+				},
+			})
+			if err != nil {
+				slog.Error("p.Handler", "err", err)
+			}
+		}
+	}
+
 	if update.Message.Voice != nil {
 		f, err := b.GetFile(ctx, &bot.GetFileParams{
 			FileID: update.Message.Voice.FileID,
@@ -106,11 +125,7 @@ func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 			})
 			if err != nil {
 				slog.Error("p.Handler", "err", err)
-				metrics.ParserInc(p.Name(), err)
-				return
 			}
-
-			metrics.ParserInc(p.Name(), nil)
 		}
 	}
 }
