@@ -14,6 +14,7 @@ type Parser interface {
 var (
 	voiceParsers    = []Parser{}
 	locationParsers = []Parser{}
+	textParsers     = []Parser{}
 )
 
 type Wrapper struct {
@@ -48,8 +49,17 @@ func ListLocationParsers() []Parser {
 	return locationParsers
 }
 
+func RegisterTextParser(parser Parser) {
+	textParsers = append(textParsers, &Wrapper{parser})
+}
+
+func ListTextParsers() []Parser {
+	return textParsers
+}
+
 type Callback struct {
 	SendMessage  func(text string)
 	SendVideo    func(filePath string)
+	SendPhoto    func(filePath, caption string)
 	ReplyMessage func(text string)
 }

@@ -74,6 +74,64 @@ func commandHandler(c commands.Command) func(ctx context.Context, b *bot.Bot, up
 }
 
 func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+	// Handle text messages (including Instagram URLs)
+	if update.Message.Text != "" {
+		for _, p := range parsers.ListTextParsers() {
+			err := p.Handler(update.Message.Text, parsers.Callback{
+				SendMessage: func(text string) {
+					b.SendMessage(ctx, &bot.SendMessageParams{
+						ChatID: update.Message.Chat.ID,
+						Text:   text,
+					})
+				},
+				SendVideo: func(filePath string) {
+					f, err := os.Open(filePath)
+					if err != nil {
+						slog.Error("file not found", "err", err)
+						return
+					}
+					defer f.Close()
+
+					b.SendVideo(ctx, &bot.SendVideoParams{
+						ChatID: update.Message.Chat.ID,
+						Video: &models.InputFileUpload{
+							Data:     f,
+							Filename: "video",
+						},
+					})
+				},
+				SendPhoto: func(filePath, caption string) {
+					fileData, err := os.ReadFile(filePath)
+					if err != nil {
+						slog.Error("file not found", "err", err)
+						return
+					}
+
+					params := &bot.SendPhotoParams{
+						ChatID:  update.Message.Chat.ID,
+						Photo:   &models.InputFileUpload{Filename: "image.jpg", Data: bytes.NewReader(fileData)},
+						Caption: caption,
+					}
+
+					b.SendPhoto(ctx, params)
+				},
+				ReplyMessage: func(text string) {
+					b.SendMessage(ctx, &bot.SendMessageParams{
+						ChatID: update.Message.Chat.ID,
+						Text:   text,
+						ReplyParameters: &models.ReplyParameters{
+							MessageID: update.Message.ID,
+							ChatID:    update.Message.Chat.ID,
+						},
+					})
+				},
+			})
+			if err != nil {
+				slog.Error("p.Handler", "err", err)
+			}
+		}
+	}
+
 	if update.Message.Location != nil {
 		for _, p := range parsers.ListLocationParsers() {
 			err := p.Handler(fmt.Sprintf("%f,%f", update.Message.Location.Latitude, update.Message.Location.Longitude), parsers.Callback{
