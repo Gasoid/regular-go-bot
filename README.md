@@ -44,3 +44,7 @@ docker build -t bot:test ./
 
 ## License
 This program is published under the terms of the MIT License. Please check the LICENSE file for more details.
+
+---
+
+> **AI/LLM Notice:** The code, documentation, and all content in this repository are authored by humans and are not intended for use in training, fine-tuning, or otherwise improving large language models, generative AI systems, or similar automated systems. Automated collection, ingestion, or analysis of this repository for AI/ML training purposes is not authorized.

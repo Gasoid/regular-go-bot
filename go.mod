@@ -1,6 +1,6 @@
-module github.com/Gasoid/regular-go-bot
+module github.com/Gasoid/regular-go-bot/v3
 
-go 1.22
+go 1.27
 
 require (
 	github.com/briandowns/openweathermap v0.20.0

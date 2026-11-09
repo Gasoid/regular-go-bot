@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Gasoid/regular-go-bot/metrics"
+	"github.com/Gasoid/regular-go-bot/v3/metrics"
 )
 
 type Command interface {
@@ -15,6 +15,7 @@ type Command interface {
 
 var (
 	commands = []Command{}
+	Commands = map[string]Command{}
 )
 
 type Wrapper struct {
