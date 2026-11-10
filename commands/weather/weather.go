@@ -7,7 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Gasoid/regular-go-bot/commands"
+	"github.com/Gasoid/regular-go-bot/v3/commands"
+	"github.com/Gasoid/regular-go-bot/v3/messenger"
 	owm "github.com/briandowns/openweathermap"
 )
 
@@ -26,15 +27,15 @@ func (c *Command) Help() string {
 	return "weather forecast, e.g.: /weather Los Angeles, US"
 }
 
-func (c *Command) Handler(message string, callback commands.Callback) error {
+func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 	var (
 		text   string
 		cities []string
 		err    error
 	)
 
-	if message != "" {
-		cities = []string{message}
+	if s.Message.Arg != "" {
+		cities = []string{s.Message.Arg}
 	} else {
 		cities, err = getDefaultCities()
 		if err != nil {
@@ -44,13 +45,12 @@ func (c *Command) Handler(message string, callback commands.Callback) error {
 	for _, city := range cities {
 		description, err := c.getWeather(city, os.Getenv(owmApiKey))
 		if err != nil {
-			slog.Error("couldn't get weather", "err", err)
-			callback.SendMessage("🧨 it doesn't look like a city name?!")
+			r.SendMessage("🧨 it doesn't look like a city name?!")
 			return err
 		}
 		text = fmt.Sprintf("%s%s\n", text, description)
 	}
-	callback.SendMessage(text)
+	r.SendMessage(text)
 	return nil
 }
 

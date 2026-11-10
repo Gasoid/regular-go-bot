@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Gasoid/regular-go-bot/metrics"
+	"github.com/Gasoid/regular-go-bot/v3/metrics"
 )
 
 func httpEndpoint() {

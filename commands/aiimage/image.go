@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Gasoid/regular-go-bot/commands"
+	"github.com/Gasoid/regular-go-bot/v3/messenger"
 
 	"context"
 
@@ -27,11 +27,11 @@ func (c *Command) Help() string {
 	return "ai creates an image"
 }
 
-func (c *Command) Handler(prompt string, callback commands.Callback) error {
+func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 	ctx := context.Background()
 	client := openai.NewClient(os.Getenv(openaiBotToken))
 	reqUrl := openai.ImageRequest{
-		Prompt:         prompt,
+		Prompt:         s.Message.Text,
 		Size:           openai.CreateImageSize1024x1024,
 		ResponseFormat: openai.CreateImageResponseFormatURL,
 		N:              1,
@@ -65,10 +65,10 @@ func (c *Command) Handler(prompt string, callback commands.Callback) error {
 		return err
 	}
 
-	callback.SendPhoto(file.Name(), prompt)
+	// r.SendPhoto(file.Name(), s.Message.Text)
 	return nil
 }
 
-func init() {
-	commands.Register(&Command{})
-}
+// func init() {
+// 	commands.Register(&Command{})
+// }

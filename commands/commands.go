@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Gasoid/regular-go-bot/v3/messenger"
 	"github.com/Gasoid/regular-go-bot/v3/metrics"
 )
 
 type Command interface {
-	Handler(string, Callback) error
+	Handler(*messenger.Sender, messenger.Receiver) error
 	Help() string
 	Name() string
 }
@@ -22,9 +23,9 @@ type Wrapper struct {
 	command Command
 }
 
-func (w *Wrapper) Handler(s string, c Callback) error {
+func (w *Wrapper) Handler(s *messenger.Sender, r messenger.Receiver) error {
 	start := time.Now()
-	err := w.command.Handler(s, c)
+	err := w.command.Handler(s, r)
 	metrics.CommandInc(w.command.Name(), err)
 	metrics.CommandDuration(w.command.Name(), time.Since(start))
 	return err
@@ -39,7 +40,7 @@ func (w *Wrapper) Name() string {
 }
 
 func Register(command Command) {
-	commands = append(commands, &Wrapper{command})
+	commands = append(commands, command)
 }
 
 func List() []Command {

@@ -1,40 +1,45 @@
 package main
 
 import (
+	"context"
 	"log/slog"
+	"os"
+	"os/signal"
 
 	"github.com/Gasoid/regular-go-bot/v3/commands"
 	"github.com/Gasoid/regular-go-bot/v3/messenger"
+	"github.com/Gasoid/regular-go-bot/v3/parsers/location"
+	"github.com/Gasoid/regular-go-bot/v3/parsers/speech"
 )
 
-type Dispatcher struct {
-	commands    map[string]commands.Command
-	middlewares []func(messenger.Handler) messenger.Handler
-}
-
-func (d *Dispatcher) Process(s *messenger.Sender, r messenger.Receiver) error {
-	h := processMiddlewares(
-		messenger.HandlerFunc(func(sender *messenger.Sender, receiver messenger.Receiver) error {
-
-			return nil
-		}), d.middlewares...)
-
-	err := h.Process(s, r)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
+const (
+	maxMessages = 5
+)
 
 func start() {
-	var (
-		chats      chan messenger.Chat
-		dispatcher Dispatcher
-	)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
+
+	dispatcher := new(Dispatcher)
+
+	dispatcher.eventFuncs[messenger.VoiceMessage] = voiceEventHandler
+	dispatcher.eventFuncs[messenger.Location] = locationEventHandler
+
+	for _, c := range commands.List() {
+		dispatcher.commands[c.Name()] = c
+	}
+
+	dispatcher.middlewares = []func(messenger.Handler) messenger.Handler{
+		metricsMiddleware,
+	}
+
+	chats := make(chan messenger.Chat, maxMessages)
+
+	for _, s := range messenger.ListServices() {
+		go s.Run(ctx, chats)
+	}
 
 	for {
-
 		chat := <-chats
 
 		err := dispatcher.Process(chat.GetSender(), chat.GetReceiver())
@@ -45,20 +50,10 @@ func start() {
 	}
 }
 
-func processMiddlewares(
-	handler messenger.Handler,
-	middlewares ...func(messenger.Handler) messenger.Handler) messenger.Handler {
-
-	for i := len(middlewares) - 1; i >= 0; i-- {
-		handler = middlewares[i](handler)
-	}
-
-	return handler
+func voiceEventHandler(s *messenger.Sender, r messenger.Receiver) error {
+	return speech.Handler(s, r)
 }
 
-func metricsMiddleware(h messenger.Handler) messenger.Handler {
-	return messenger.HandlerFunc(
-		func(s *messenger.Sender, r messenger.Receiver) error {
-			return h.Process(s, r)
-		})
+func locationEventHandler(s *messenger.Sender, r messenger.Receiver) error {
+	return location.Handler(s, r)
 }

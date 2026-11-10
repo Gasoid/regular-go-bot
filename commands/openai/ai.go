@@ -1,10 +1,10 @@
 package openai
 
 import (
-	"log/slog"
 	"os"
 
-	"github.com/Gasoid/regular-go-bot/commands"
+	"github.com/Gasoid/regular-go-bot/v3/commands"
+	"github.com/Gasoid/regular-go-bot/v3/messenger"
 
 	"context"
 
@@ -27,7 +27,7 @@ func (c *Command) Help() string {
 	return "ai answers"
 }
 
-func (c *Command) Handler(message string, callback commands.Callback) error {
+func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 	client := openai.NewClient(os.Getenv(openaiBotToken))
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
@@ -41,18 +41,17 @@ func (c *Command) Handler(message string, callback commands.Callback) error {
 				},
 				{
 					Role:    openai.ChatMessageRoleUser,
-					Content: message,
+					Content: s.Message.Arg,
 				},
 			},
 		},
 	)
 
 	if err != nil {
-		slog.Error("ChatCompletion error", "err", err)
-		return nil
+		return err
 	}
 
-	callback.SendMessage(resp.Choices[0].Message.Content)
+	r.SendMessage(resp.Choices[0].Message.Content)
 	return nil
 }
 

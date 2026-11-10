@@ -4,13 +4,10 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"strconv"
-	"strings"
-
-	"github.com/Gasoid/regular-go-bot/parsers"
 
 	"context"
 
+	"github.com/Gasoid/regular-go-bot/v3/messenger"
 	openai "github.com/sashabaranov/go-openai"
 )
 
@@ -18,37 +15,15 @@ const (
 	openaiBotToken = "OPENAI_TOKEN"
 )
 
-type Command struct {
-	name string
-}
+func Handler(sender *messenger.Sender, r messenger.Receiver) error {
+	lat, long := sender.Message.Coordinates[0], sender.Message.Coordinates[1]
 
-func (c *Command) Name() string {
-	return "location"
-}
-
-func (c *Command) Handler(coords string, callback parsers.Callback) error {
-	coordsList := strings.Split(coords, ",")
-	if len(coordsList) < 2 {
-		slog.Debug("location", "msg", "provided coordinates are wrong")
-		return nil
-	}
-
-	lat, err := strconv.ParseFloat(coordsList[0], 64)
+	city, weatherText, err := getWeatherByCoords(lat, long)
 	if err != nil {
 		return err
 	}
 
-	long, err := strconv.ParseFloat(coordsList[1], 64)
-	if err != nil {
-		return err
-	}
-
-	weatherText, err := c.getWeatherByCoords(lat, long)
-	if err != nil {
-		return err
-	}
-
-	callback.ReplyMessage(weatherText)
+	r.ReplyMessage(weatherText)
 
 	client := openai.NewClient(os.Getenv(openaiBotToken))
 	resp, err := client.CreateChatCompletion(
@@ -63,7 +38,7 @@ func (c *Command) Handler(coords string, callback parsers.Callback) error {
 				},
 				{
 					Role:    openai.ChatMessageRoleUser,
-					Content: fmt.Sprintf("Location is %s with coordinates latitude: %f longitude: %f", c.name, lat, long),
+					Content: fmt.Sprintf("Location is %s with coordinates latitude: %f longitude: %f", city, lat, long),
 				},
 			},
 		},
@@ -74,10 +49,5 @@ func (c *Command) Handler(coords string, callback parsers.Callback) error {
 		return nil
 	}
 
-	callback.ReplyMessage(resp.Choices[0].Message.Content)
-	return nil
-}
-
-func init() {
-	parsers.RegisterLocationParser(&Command{})
+	return r.ReplyMessage(resp.Choices[0].Message.Content)
 }
