@@ -27,6 +27,7 @@ func (c *Command) Help() string {
 	return "weather forecast, e.g.: /weather Los Angeles, US"
 }
 
+//nolint:errcheck
 func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 	var (
 		text   string

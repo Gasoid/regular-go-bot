@@ -56,6 +56,7 @@ func (c *Callback) ReplyMessage(t string) error {
 
 type tgInstance struct{}
 
+//nolint:errcheck
 func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error {
 	handler := func(ctx context.Context, b *bot.Bot, update *models.Update) {
 		sender := &messenger.Sender{

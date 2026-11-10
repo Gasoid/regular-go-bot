@@ -22,6 +22,7 @@ func (c *Command) Help() string {
 	return "the command drops a joke"
 }
 
+//nolint:errcheck
 func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 	req, err := http.NewRequest("GET", jokeUrl, nil)
 	if err != nil {

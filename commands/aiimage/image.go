@@ -27,6 +27,7 @@ func (c *Command) Help() string {
 	return "ai creates an image"
 }
 
+//nolint:errcheck
 func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 	ctx := context.Background()
 	client := openai.NewClient(os.Getenv(openaiBotToken))
