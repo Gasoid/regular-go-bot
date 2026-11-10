@@ -27,6 +27,7 @@ func (c *Command) Help() string {
 	return "ai answers"
 }
 
+//nolint:errcheck
 func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 	client := openai.NewClient(os.Getenv(openaiBotToken))
 	resp, err := client.CreateChatCompletion(

@@ -150,6 +150,7 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 	return nil
 }
 
+//nolint:errcheck
 func downloadVoice(filepath string) (path string, err error) {
 	suffix := strings.Split(filepath, ".")
 	if len(suffix) < 2 {

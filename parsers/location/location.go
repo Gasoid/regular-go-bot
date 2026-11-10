@@ -15,6 +15,7 @@ const (
 	openaiBotToken = "OPENAI_TOKEN"
 )
 
+//nolint:errcheck
 func Handler(sender *messenger.Sender, r messenger.Receiver) error {
 	lat, long := sender.Message.Coordinates[0], sender.Message.Coordinates[1]
 

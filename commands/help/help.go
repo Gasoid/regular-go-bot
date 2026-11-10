@@ -15,6 +15,7 @@ func (c *Command) Help() string {
 	return "the command prints help"
 }
 
+//nolint:errcheck
 func (c *Command) Handler(_ *messenger.Sender, r messenger.Receiver) error {
 	r.SendMessage(commands.Help())
 	return nil
