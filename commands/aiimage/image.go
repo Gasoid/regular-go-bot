@@ -41,23 +41,21 @@ func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 
 	resp, err := client.CreateImage(ctx, reqUrl)
 	if err != nil {
-		slog.Error("client.CreateImage", "err", err)
 		return err
 	}
 
 	slog.Debug("image generated", "url", resp.Data[0].URL)
 	httpResp, e := http.Get(resp.Data[0].URL)
 	if e != nil {
-		slog.Error("http.Get", "err", err)
-		return err
+		return e
 	}
 	defer httpResp.Body.Close()
 
 	file, err := os.CreateTemp("", "image*.png")
 	if err != nil {
-		slog.Error("os.CreateTemp", "err", err)
 		return err
 	}
+
 	defer os.Remove(file.Name())
 	defer file.Close()
 

@@ -7,7 +7,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/Gasoid/regular-go-bot/v3/commands"
 	"github.com/Gasoid/regular-go-bot/v3/messenger"
 	"github.com/Gasoid/regular-go-bot/v3/parsers/location"
 	"github.com/Gasoid/regular-go-bot/v3/parsers/speech"
@@ -21,18 +20,7 @@ func start() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	dispatcher := new(Dispatcher)
-
-	dispatcher.eventFuncs[messenger.VoiceMessage] = voiceEventHandler
-	dispatcher.eventFuncs[messenger.Location] = locationEventHandler
-
-	for _, c := range commands.List() {
-		dispatcher.commands[c.Name()] = c
-	}
-
-	dispatcher.middlewares = []func(messenger.Handler) messenger.Handler{
-		metricsMiddleware,
-	}
+	dispatcher := NewDispatcher()
 
 	chats := make(chan messenger.Chat, maxMessages)
 

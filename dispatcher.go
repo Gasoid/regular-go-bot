@@ -35,3 +35,22 @@ func (d *Dispatcher) Process(s *messenger.Sender, r messenger.Receiver) error {
 
 	return nil
 }
+
+func NewDispatcher() *Dispatcher {
+	dispatcher := new(Dispatcher)
+	dispatcher.commands = make(map[string]commands.Command, len(commands.List()))
+	dispatcher.eventFuncs = make(map[messenger.EventType]func(*messenger.Sender, messenger.Receiver) error)
+
+	dispatcher.eventFuncs[messenger.VoiceMessage] = voiceEventHandler
+	dispatcher.eventFuncs[messenger.Location] = locationEventHandler
+
+	for _, c := range commands.List() {
+		dispatcher.commands[c.Name()] = c
+	}
+
+	dispatcher.middlewares = []func(messenger.Handler) messenger.Handler{
+		metricsMiddleware,
+	}
+
+	return dispatcher
+}
