@@ -8,8 +8,6 @@ import (
 	"syscall"
 
 	"github.com/Gasoid/regular-go-bot/v3/messenger"
-	"github.com/Gasoid/regular-go-bot/v3/parsers/location"
-	"github.com/Gasoid/regular-go-bot/v3/parsers/speech"
 )
 
 const (
@@ -46,12 +44,4 @@ func start() {
 			return
 		}
 	}
-}
-
-func voiceEventHandler(s *messenger.Sender, r messenger.Receiver) error {
-	return speech.Handler(s, r)
-}
-
-func locationEventHandler(s *messenger.Sender, r messenger.Receiver) error {
-	return location.Handler(s, r)
 }

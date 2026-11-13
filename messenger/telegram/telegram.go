@@ -92,19 +92,48 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 				return
 			}
 
-			path, err := downloadVoice(f.FilePath)
+			path, err := downloadFile(f.FilePath)
 			if err != nil {
-				slog.Error("downloadVoice", "err", err)
+				slog.Error("can't download voice", "err", err)
 				return
 			}
 
 			sender.MessageType = messenger.VoiceMessage
 			sender.Message.VoiceFilePath = path
+		case len(update.Message.Photo) > 0:
+			sender.MessageType = messenger.Photo
+			for _, p := range update.Message.Photo {
+				f, err := b.GetFile(ctx, &bot.GetFileParams{FileID: p.FileID})
+				if err != nil {
+					slog.Error("b.GetFile", "err", err)
+					continue
+				}
+
+				path, err := downloadFile(f.FilePath)
+				if err != nil {
+					slog.Error("can't download photo", "err", err)
+					continue
+				}
+				sender.Message.PhotoPaths = append(sender.Message.PhotoPaths, path)
+			}
 
 		case update.Message.Location != nil:
 			sender.MessageType = messenger.Location
 			sender.Message.Coordinates = [2]float64{
 				update.Message.Location.Latitude, update.Message.Location.Longitude,
+			}
+		case update.Message.ReplyToMessage != nil && update.Message.ReplyToMessage.From.ID == b.ID():
+			sender.MessageType = messenger.ReplyMessage
+			fallthrough
+		case len(update.Message.Entities) > 0:
+			u, err := b.GetMe(ctx)
+			if err != nil {
+				slog.Error("GetMe", "err", err)
+				return
+			}
+
+			if strings.HasPrefix(update.Message.Text, "@"+u.Username) {
+				sender.MessageType = messenger.Mentioned
 			}
 		}
 
@@ -155,13 +184,13 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 }
 
 //nolint:errcheck
-func downloadVoice(filepath string) (path string, err error) {
+func downloadFile(filepath string) (path string, err error) {
 	suffix := strings.Split(filepath, ".")
 	if len(suffix) < 2 {
 		return "", errors.New("file name doesn't contain suffix")
 	}
 
-	file, err := os.CreateTemp("", "voice*."+suffix[1])
+	file, err := os.CreateTemp("", "tg*."+suffix[1])
 	if err != nil {
 		return "", err
 	}
@@ -184,7 +213,7 @@ func downloadVoice(filepath string) (path string, err error) {
 		return "", err
 	}
 
-	slog.Debug("downloadVOice", "filepath", file.Name())
+	slog.Debug("downloadFile", "filepath", file.Name())
 
 	return file.Name(), nil
 }

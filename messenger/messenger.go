@@ -21,6 +21,9 @@ const (
 	VideoMessage
 	Command
 	Location
+	ReplyMessage
+	Mentioned
+	Photo
 )
 
 type Message struct {
@@ -30,6 +33,7 @@ type Message struct {
 	VoiceFilePath string
 	Coordinates   [2]float64
 	Arg           string
+	PhotoPaths    []string
 }
 
 type Sender struct {
