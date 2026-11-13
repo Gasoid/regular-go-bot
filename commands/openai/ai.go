@@ -147,11 +147,11 @@ func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 		},
 	}
 
-	for i := 0; i < maxToolCallIter; i++ {
+	for range maxToolCallIter {
 		resp, err := client.CreateChatCompletion(
 			context.Background(),
 			openai.ChatCompletionRequest{
-				Model:               openai.GPT4oMini,
+				Model:               openai.GPT4o,
 				MaxCompletionTokens: maxTokens,
 				Messages:            messages,
 				Tools:               []openai.Tool{tavilyTool},
