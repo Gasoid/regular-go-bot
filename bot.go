@@ -15,6 +15,7 @@ const (
 )
 
 func start() {
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
@@ -32,7 +33,7 @@ func start() {
 	}
 
 	for {
-		slog.Info("waiting for incoming messages")
+		slog.Debug("waiting for incoming messages")
 		select {
 		case chat := <-chats:
 			err := dispatcher.Process(chat.GetSender(), chat.GetReceiver())

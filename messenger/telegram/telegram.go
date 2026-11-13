@@ -76,6 +76,8 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 			},
 		}
 
+		slog.Debug("is chat type a group", "check", update.Message.Chat.Type == models.ChatTypeGroup)
+
 		switch {
 		case strings.HasPrefix(update.Message.Text, "/"):
 			parts := strings.Split(update.Message.Text, " ")
