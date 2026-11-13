@@ -42,18 +42,17 @@ func formatWeather(w *owm.CurrentWeatherData) string {
 	return fmt.Sprintf(weatherTmpl, w.Name, wDescr, w.Main.Temp, w.Wind.Speed)
 }
 
-func (c *Command) getWeatherByCoords(lat, long float64) (string, error) {
+func getWeatherByCoords(lat, long float64) (string, string, error) {
 	w, err := owm.NewCurrent("C", "ru", os.Getenv(owmApiKey))
 	if err != nil {
 		slog.Error("couldn't load weather", "err", err)
-		return "", fmt.Errorf("couldn't load weather %w", err)
+		return "", "", fmt.Errorf("couldn't load weather %w", err)
 	}
 
 	err = w.CurrentByCoordinates(&owm.Coordinates{Longitude: long, Latitude: lat})
 	if err != nil {
-		return "", fmt.Errorf("couldn't load weather %w", err)
+		return "", "", fmt.Errorf("couldn't load weather %w", err)
 	}
-	c.name = w.Name
 
-	return formatWeather(w), nil
+	return w.Name, formatWeather(w), nil
 }

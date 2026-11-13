@@ -2,10 +2,10 @@ package joke
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
-	"github.com/Gasoid/regular-go-bot/commands"
+	"github.com/Gasoid/regular-go-bot/v3/commands"
+	"github.com/Gasoid/regular-go-bot/v3/messenger"
 )
 
 const (
@@ -22,20 +22,21 @@ func (c *Command) Help() string {
 	return "the command drops a joke"
 }
 
-func (c *Command) Handler(s string, callback commands.Callback) error {
+//nolint:errcheck
+func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 	req, err := http.NewRequest("GET", jokeUrl, nil)
 	if err != nil {
-		log.Println("joke error:", err.Error())
 		return err
 	}
+
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println("joke error:", err.Error())
 		return err
 	}
+
 	defer resp.Body.Close()
 	rr := struct {
 		Category string `json:"category"`
@@ -43,11 +44,11 @@ func (c *Command) Handler(s string, callback commands.Callback) error {
 	}{}
 
 	if err := json.NewDecoder(resp.Body).Decode(&rr); err != nil {
-		log.Println("joke error:", err.Error())
 		return err
 
 	}
-	callback.SendMessage(rr.Content)
+
+	r.SendMessage(rr.Content)
 	return nil
 }
 

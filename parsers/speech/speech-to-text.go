@@ -1,13 +1,11 @@
 package speech
 
 import (
-	"log/slog"
 	"os"
-
-	"github.com/Gasoid/regular-go-bot/parsers"
 
 	"context"
 
+	"github.com/Gasoid/regular-go-bot/v3/messenger"
 	openai "github.com/sashabaranov/go-openai"
 )
 
@@ -15,33 +13,19 @@ const (
 	openaiBotToken = "OPENAI_TOKEN"
 )
 
-type Command struct{}
-
-func (c *Command) Name() string {
-	return "speech-to-voice"
-}
-
-func (c *Command) Handler(filepath string, callback parsers.Callback) error {
-	slog.Debug("Speech", "msg", "started")
-
+func Handler(sender *messenger.Sender, r messenger.Receiver) error {
 	client := openai.NewClient(os.Getenv(openaiBotToken))
 	ctx := context.Background()
 
 	req := openai.AudioRequest{
 		Model:    openai.Whisper1,
-		FilePath: filepath,
+		FilePath: sender.Message.VoiceFilePath,
 	}
+
 	resp, err := client.CreateTranscription(ctx, req)
 	if err != nil {
 		return err
 	}
 
-	callback.ReplyMessage(resp.Text)
-
-	slog.Debug("Speech", "msg", "finished")
-	return nil
-}
-
-func init() {
-	parsers.RegisterVoiceParser(&Command{})
+	return r.ReplyMessage(resp.Text)
 }

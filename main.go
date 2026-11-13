@@ -1,13 +1,14 @@
 package main
 
 import (
-	"log/slog"
-
-	"github.com/Gasoid/regular-go-bot/telegram"
+	_ "github.com/Gasoid/regular-go-bot/v3/commands/help"
+	_ "github.com/Gasoid/regular-go-bot/v3/commands/joke"
+	_ "github.com/Gasoid/regular-go-bot/v3/commands/openai"
+	_ "github.com/Gasoid/regular-go-bot/v3/commands/weather"
+	_ "github.com/Gasoid/regular-go-bot/v3/messenger/telegram"
 )
 
 func main() {
-	httpEndpoint()
-	slog.SetLogLoggerLevel(slog.LevelDebug)
-	telegram.Run()
+	go httpEndpoint()
+	start()
 }

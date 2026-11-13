@@ -2,9 +2,9 @@
 
 
 ## Settings / Env variables
-You have to provide 3 env variables:
+You have to provide 4 env variables:
 
-- BOT_TOKEN - telegram token
+- TELEGRAM_BOT_TOKEN - telegram token
 - OPENAI_TOKEN - chatgpt token
 - OWM_API_KEY - api key for weather command
 - DEFAULT_WEATHER_CITIES - default cities, e.g. Berlin,Chicago,Los Angeles
@@ -43,4 +43,8 @@ docker build -t bot:test ./
 ```
 
 ## License
-This program is published under the terms of the MIT License. Please check the LICENSE file for more details.
+MIT
+
+---
+
+> **AI/LLM Notice:** The code, documentation, and all content in this repository are authored by humans and are not intended for use in training, fine-tuning, or otherwise improving large language models, generative AI systems, or similar automated systems. Automated collection, ingestion, or analysis of this repository for AI/ML training purposes is not authorized.

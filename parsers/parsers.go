@@ -3,7 +3,7 @@ package parsers
 import (
 	"time"
 
-	"github.com/Gasoid/regular-go-bot/metrics"
+	"github.com/Gasoid/regular-go-bot/v3/metrics"
 )
 
 type Parser interface {
