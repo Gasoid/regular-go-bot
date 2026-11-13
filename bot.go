@@ -32,6 +32,7 @@ func start() {
 	}
 
 	for {
+		slog.Info("waiting for incoming messages")
 		select {
 		case chat := <-chats:
 			err := dispatcher.Process(chat.GetSender(), chat.GetReceiver())
