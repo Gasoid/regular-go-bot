@@ -138,6 +138,14 @@ func tavilySearch(query string) (string, error) {
 func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 	client := openai.NewClient(os.Getenv(openaiBotToken))
 
+	userContent := s.Message.Arg
+	if s.Message.ReplyToMessage != "" {
+		userContent = fmt.Sprintf(
+			"Пользователь отвечает на предыдущее сообщение: «%s»\n\nТекст ответа пользователя: %s",
+			s.Message.ReplyToMessage, s.Message.Arg,
+		)
+	}
+
 	messages := []openai.ChatCompletionMessage{
 		{
 			Role:    openai.ChatMessageRoleSystem,
@@ -145,7 +153,7 @@ func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 		},
 		{
 			Role:    openai.ChatMessageRoleUser,
-			Content: s.Message.Arg,
+			Content: userContent,
 		},
 	}
 

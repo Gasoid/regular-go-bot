@@ -126,6 +126,7 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 			}
 		case update.Message.ReplyToMessage != nil && update.Message.ReplyToMessage.From.ID == b.ID():
 			sender.MessageType = messenger.ReplyMessage
+			sender.Message.ReplyToMessage = update.Message.ReplyToMessage.Text
 			fallthrough
 		case len(update.Message.Entities) > 0:
 			u, err := b.GetMe(ctx)

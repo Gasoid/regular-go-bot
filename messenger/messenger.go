@@ -27,13 +27,14 @@ const (
 )
 
 type Message struct {
-	IsGroup       bool
-	Text          string
-	Command       string
-	VoiceFilePath string
-	Coordinates   [2]float64
-	Arg           string
-	PhotoPaths    []string
+	IsGroup        bool
+	Text           string
+	Command        string
+	VoiceFilePath  string
+	Coordinates    [2]float64
+	Arg            string
+	PhotoPaths     []string
+	ReplyToMessage string
 }
 
 type Sender struct {
