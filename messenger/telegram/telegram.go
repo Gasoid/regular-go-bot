@@ -39,21 +39,6 @@ func (c *chat) GetReceiver() messenger.Receiver {
 	return c.receiver
 }
 
-type Callback struct {
-	sendMessageFunc  func(text string)
-	replyMessageFunc func(text string)
-}
-
-func (c *Callback) SendMessage(t string) error {
-	c.sendMessageFunc(t)
-	return nil
-}
-
-func (c *Callback) ReplyMessage(t string) error {
-	c.replyMessageFunc(t)
-	return nil
-}
-
 type tgInstance struct{}
 
 //nolint:errcheck
@@ -142,14 +127,14 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 
 		chats <- &chat{
 			sender: sender,
-			receiver: &Callback{
-				sendMessageFunc: func(text string) {
+			receiver: &messenger.Callback{
+				SendMessageFunc: func(text string) {
 					b.SendMessage(ctx, &bot.SendMessageParams{
 						ChatID: update.Message.Chat.ID,
 						Text:   text,
 					})
 				},
-				replyMessageFunc: func(text string) {
+				ReplyMessageFunc: func(text string) {
 					b.SendMessage(ctx, &bot.SendMessageParams{
 						ChatID: update.Message.Chat.ID,
 						Text:   text,

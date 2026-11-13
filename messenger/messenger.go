@@ -71,3 +71,18 @@ func RegisterService(s Service) {
 func ListServices() []Service {
 	return services
 }
+
+type Callback struct {
+	SendMessageFunc  func(text string)
+	ReplyMessageFunc func(text string)
+}
+
+func (c *Callback) SendMessage(t string) error {
+	c.SendMessageFunc(t)
+	return nil
+}
+
+func (c *Callback) ReplyMessage(t string) error {
+	c.ReplyMessageFunc(t)
+	return nil
+}

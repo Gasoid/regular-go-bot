@@ -86,7 +86,7 @@ func tavilySearch(query string) (string, error) {
 
 	reqBody := tavilySearchRequest{
 		Query:       query,
-		SearchDepth: "basic",
+		SearchDepth: "advanced",
 		MaxResults:  3,
 	}
 
