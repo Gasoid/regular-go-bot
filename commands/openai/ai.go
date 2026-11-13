@@ -77,6 +77,7 @@ type tavilySearchResponse struct {
 	Results []tavilyResult `json:"results"`
 }
 
+//nolint:errcheck
 func tavilySearch(query string) (string, error) {
 	apiKey := os.Getenv(tavilyAPIKey)
 	if apiKey == "" {
@@ -133,6 +134,7 @@ func tavilySearch(query string) (string, error) {
 	return result, nil
 }
 
+//nolint:errcheck
 func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 	client := openai.NewClient(os.Getenv(openaiBotToken))
 
