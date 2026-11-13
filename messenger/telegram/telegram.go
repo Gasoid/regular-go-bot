@@ -70,7 +70,7 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 			ChatID:      strconv.FormatInt(update.Message.Chat.ID, 10),
 			MessageType: messenger.TextMessage,
 			Message: messenger.Message{
-				IsGroup: update.Message.Chat.Type == models.ChatTypeGroup,
+				IsGroup: !update.Message.Chat.IsDirectMessages,
 				Text:    update.Message.Text,
 				Command: "",
 			},
