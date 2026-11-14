@@ -100,13 +100,13 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 			MessageType: messenger.TextMessage,
 			Message: messenger.Message{
 				IsGroup: !ctx.GuildID.IsZero(),
-				Text:    ctx.Message.Content,
+				Text:    ctx.Content,
 			},
 		}
 
 		switch {
-		case len(ctx.Message.Attachments) > 0:
-			for _, a := range ctx.Message.Attachments {
+		case len(ctx.Attachments) > 0:
+			for _, a := range ctx.Attachments {
 				if !strings.HasPrefix(a.ContentType, "audio/") || a.DurationSecs == 0 || a.Waveform == "" {
 					continue
 				}
@@ -115,7 +115,7 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 				sender.MessageType = messenger.VoiceMessage
 				break
 			}
-		case len(ctx.Message.Mentions) > 0:
+		case len(ctx.Mentions) > 0:
 			for _, m := range ctx.Message.Mentions {
 				if m.ID == ctx.Bot.User().ID {
 					sender.MessageType = messenger.Mentioned
