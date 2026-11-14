@@ -2,7 +2,7 @@ package discord
 
 import (
 	"context"
-	"errors"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -51,7 +51,8 @@ type discordInstance struct{}
 func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error {
 	token := os.Getenv("DISCORD_TOKEN")
 	if token == "" {
-		return errors.New("DISCORD_TOKEN is required")
+		slog.Info("No DISCORD_TOKEN provided, so discord has not started")
+		return nil
 	}
 
 	handler := func(ctx *bot.InteractionContext) {
@@ -148,7 +149,7 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 
 	client.OnMessageCreate(messageHandler)
 
-	if err := client.Run(); err != nil {
+	if err := client.RunContext(ctx); err != nil {
 		return err
 	}
 

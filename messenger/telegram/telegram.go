@@ -43,6 +43,11 @@ type tgInstance struct{}
 
 //nolint:errcheck
 func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error {
+	token := os.Getenv(telegramBotToken)
+	if token == "" {
+		slog.Info("No telegram token provided, so telegram has not started")
+		return nil
+	}
 	handler := func(ctx context.Context, b *bot.Bot, update *models.Update) {
 		if update.Message == nil {
 			return
@@ -146,7 +151,7 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 		bot.WithDefaultHandler(handler),
 	}
 
-	b, err := bot.New(os.Getenv(telegramBotToken), opts...)
+	b, err := bot.New(token, opts...)
 	if err != nil {
 		return err
 	}
