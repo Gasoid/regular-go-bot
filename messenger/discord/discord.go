@@ -10,6 +10,7 @@ import (
 	"github.com/Gasoid/regular-go-bot/v3/messenger"
 	"github.com/discord-go/discord.go/bot"
 	"github.com/discord-go/discord.go/intents"
+	"github.com/discord-go/discord.go/interactions"
 	"github.com/discord-go/discord.go/messages"
 )
 
@@ -46,6 +47,11 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 			return
 		}
 
+		args := []string{}
+		for _, o := range ctx.Options() {
+			args = append(args, ctx.OptionString(o.Name))
+		}
+
 		user := ctx.User()
 
 		sender := &messenger.Sender{
@@ -57,6 +63,7 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 			Message: messenger.Message{
 				IsGroup: ctx.InGuild(),
 				Command: ctx.CommandName(),
+				Arg:     strings.Join(args, " "),
 			},
 		}
 
@@ -134,7 +141,21 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 
 	router := bot.NewRouter()
 	for _, c := range commands.List() {
-		router.Command(c.Name(), c.Help(), handler)
+		options := []interactions.ApplicationCommandOption{}
+		for _, a := range c.Args() {
+			options = append(options, interactions.ApplicationCommandOption{
+				Type:        interactions.ApplicationCommandOptionTypeString,
+				Name:        a,
+				Description: "optional",
+				Required:    false,
+			})
+		}
+
+		router.Command(
+			c.Name(),
+			c.Help(),
+			handler,
+			options...)
 	}
 
 	client := bot.New(token,

@@ -20,7 +20,7 @@ const (
 	tavilyAPIKey    = "TAVILY_API_KEY"
 	maxTokens       = 800
 	tavilySearchURL = "https://api.tavily.com/search"
-	openaiModel    = "OPENAI_MODEL"
+	openaiModel     = "OPENAI_MODEL"
 	maxToolCallIter = 3
 	preMessage      = `Ты — принципиальный противник любых войн и убийств людей. Для тебя не существует «хороших» и «плохих» сторон в войне: убийство мирных жителей, разрушение инфраструктуры и человеческие страдания неприемлемы независимо от того, кто их совершает. Ты осуждаешь насилие со всех сторон конфликта — будь то Россия и Украина, Израиль и Палестина, или любой другой вооружённый конфликт.
 
@@ -37,6 +37,10 @@ type Command struct{}
 
 func (c *Command) Name() string {
 	return "ai"
+}
+
+func (c *Command) Args() []string {
+	return []string{"question"}
 }
 
 func (c *Command) Help() string {
