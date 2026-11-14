@@ -11,6 +11,7 @@ import (
 	"github.com/discord-go/discord.go/bot"
 	"github.com/discord-go/discord.go/channels"
 	"github.com/discord-go/discord.go/intents"
+	"github.com/discord-go/discord.go/messages"
 )
 
 func init() {
@@ -122,6 +123,9 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 					break
 				}
 			}
+		case ctx.ReferencedMessage != nil && ctx.ReferencedMessage.Type == messages.MessageTypeReply:
+			sender.MessageType = messenger.ReplyMessage
+			sender.Message.ReplyToMessage = ctx.ReferencedMessage.Content
 		}
 
 		chats <- &chat{
