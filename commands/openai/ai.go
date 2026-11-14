@@ -163,10 +163,11 @@ func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 		resp, err := client.CreateChatCompletion(
 			context.Background(),
 			openai.ChatCompletionRequest{
-				Model:               getEnvOrDefault(openaiModel, "gpt-5.6-luna"),
+				Model:               getEnvOrDefault(openaiModel, "gpt-6-luna"),
 				MaxCompletionTokens: maxTokens,
 				Messages:            messages,
 				Tools:               []openai.Tool{tavilyTool},
+				ReasoningEffort:     openai.ReasoningEffortNone,
 			},
 		)
 		if err != nil {

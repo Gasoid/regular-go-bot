@@ -33,6 +33,7 @@ func Handler(sender *messenger.Sender, r messenger.Receiver) error {
 		openai.ChatCompletionRequest{
 			Model:               model(),
 			MaxCompletionTokens: 250,
+			ReasoningEffort:     openai.ReasoningEffortNone,
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    openai.ChatMessageRoleUser,
@@ -58,5 +59,5 @@ func model() string {
 	if v := os.Getenv(openaiModel); v != "" {
 		return v
 	}
-	return "gpt-5.6-luna"
+	return "gpt-6-luna"
 }

@@ -7,7 +7,7 @@ require (
 	github.com/discord-go/discord.go v0.16.1-wid
 	github.com/go-telegram/bot v1.27.0
 	github.com/prometheus/client_golang v1.12.1
-	github.com/sashabaranov/go-openai v1.32.2
+	github.com/sashabaranov/go-openai v1.43.0
 )
 
 require (
