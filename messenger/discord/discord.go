@@ -76,6 +76,7 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 				ReplyMessageFunc: func(text string) {
 					ctx.Reply(text)
 				},
+				SendTypingFunc: func() {},
 			},
 		}
 	}
