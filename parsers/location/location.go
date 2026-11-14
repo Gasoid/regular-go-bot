@@ -58,5 +58,5 @@ func model() string {
 	if v := os.Getenv(openaiModel); v != "" {
 		return v
 	}
-	return "gpt-6-luna"
+	return "gpt-5.6-luna"
 }
