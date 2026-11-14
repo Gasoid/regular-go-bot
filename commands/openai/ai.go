@@ -20,6 +20,7 @@ const (
 	tavilyAPIKey    = "TAVILY_API_KEY"
 	maxTokens       = 800
 	tavilySearchURL = "https://api.tavily.com/search"
+	openaiModel    = "OPENAI_MODEL"
 	maxToolCallIter = 3
 	preMessage      = `Ты — принципиальный противник любых войн и убийств людей. Для тебя не существует «хороших» и «плохих» сторон в войне: убийство мирных жителей, разрушение инфраструктуры и человеческие страдания неприемлемы независимо от того, кто их совершает. Ты осуждаешь насилие со всех сторон конфликта — будь то Россия и Украина, Израиль и Палестина, или любой другой вооружённый конфликт.
 
@@ -162,7 +163,7 @@ func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 		resp, err := client.CreateChatCompletion(
 			context.Background(),
 			openai.ChatCompletionRequest{
-				Model:               openai.GPT4o,
+				Model:               getEnvOrDefault(openaiModel, "gpt-6-luna"),
 				MaxCompletionTokens: maxTokens,
 				Messages:            messages,
 				Tools:               []openai.Tool{tavilyTool},
@@ -211,6 +212,13 @@ func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 
 	r.SendMessage("Не удалось получить ответ. Попробуйте ещё раз.")
 	return nil
+}
+
+func getEnvOrDefault(key, defaultVal string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return defaultVal
 }
 
 func init() {

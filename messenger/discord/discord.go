@@ -9,7 +9,6 @@ import (
 	"github.com/Gasoid/regular-go-bot/v3/commands"
 	"github.com/Gasoid/regular-go-bot/v3/messenger"
 	"github.com/discord-go/discord.go/bot"
-	"github.com/discord-go/discord.go/channels"
 	"github.com/discord-go/discord.go/intents"
 	"github.com/discord-go/discord.go/messages"
 )
@@ -47,14 +46,16 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 			return
 		}
 
+		user := ctx.User()
+
 		sender := &messenger.Sender{
-			UserID:      ctx.Message.Author.ID.String(),
-			Username:    ctx.Message.Author.Username,
+			UserID:      user.ID.String(),
+			Username:    user.Username,
 			Group:       *ctx.Channel.Name,
-			ChatID:      ctx.Message.ChannelID.String(),
+			ChatID:      ctx.ChannelID().String(),
 			MessageType: messenger.Command,
 			Message: messenger.Message{
-				IsGroup: ctx.Channel.Type == channels.ChannelTypeGuildText,
+				IsGroup: ctx.InGuild(),
 				Command: ctx.CommandName(),
 			},
 		}
