@@ -143,6 +143,8 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 
 	client.OnMessageCreate(messageHandler)
 
+	slog.Info("discord service is running")
+
 	if err := client.RunContext(ctx); err != nil {
 		return err
 	}

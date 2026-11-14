@@ -175,7 +175,7 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 	}
 	b.SetMyCommands(ctx, &bot.SetMyCommandsParams{Commands: commandList, Scope: &models.BotCommandScopeAllPrivateChats{}})
 
-	slog.Info("service is running")
+	slog.Info("telegram service is running")
 	b.Start(ctx)
 	return nil
 }

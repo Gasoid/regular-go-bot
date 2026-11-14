@@ -5,6 +5,7 @@ import (
 	_ "github.com/Gasoid/regular-go-bot/v3/commands/joke"
 	_ "github.com/Gasoid/regular-go-bot/v3/commands/openai"
 	_ "github.com/Gasoid/regular-go-bot/v3/commands/weather"
+	_ "github.com/Gasoid/regular-go-bot/v3/messenger/discord"
 	_ "github.com/Gasoid/regular-go-bot/v3/messenger/telegram"
 )
 
