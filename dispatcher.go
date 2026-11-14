@@ -89,6 +89,7 @@ func messageEventHandler(s *messenger.Sender, r messenger.Receiver) error {
 func photoEventsHandler(s *messenger.Sender, r messenger.Receiver) error {
 	defer func() {
 		for _, p := range s.Message.PhotoPaths {
+			//nolint:errcheck
 			os.Remove(p)
 		}
 	}()
