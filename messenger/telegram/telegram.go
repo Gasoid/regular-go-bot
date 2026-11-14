@@ -125,6 +125,8 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 			}
 		}
 
+		// b.
+
 		chats <- &chat{
 			sender: sender,
 			receiver: &messenger.Callback{
@@ -142,6 +144,12 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 							MessageID: update.Message.ID,
 							ChatID:    update.Message.Chat.ID,
 						},
+					})
+				},
+				SendTypingFunc: func() {
+					b.SendChatAction(ctx, &bot.SendChatActionParams{
+						ChatID: update.Message.Chat.ID,
+						Action: models.ChatActionTyping,
 					})
 				},
 			},

@@ -29,6 +29,7 @@ func (c *Command) Help() string {
 
 //nolint:errcheck
 func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
+	r.SendTyping()
 	ctx := context.Background()
 	client := openai.NewClient(os.Getenv(openaiBotToken))
 	reqUrl := openai.ImageRequest{

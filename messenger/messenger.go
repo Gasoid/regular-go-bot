@@ -48,8 +48,9 @@ type Sender struct {
 }
 
 type Receiver interface {
-	SendMessage(text string) error
-	ReplyMessage(text string) error
+	SendMessage(text string)
+	ReplyMessage(text string)
+	SendTyping()
 }
 
 type Chat interface {
@@ -76,14 +77,17 @@ func ListServices() []Service {
 type Callback struct {
 	SendMessageFunc  func(text string)
 	ReplyMessageFunc func(text string)
+	SendTypingFunc   func()
 }
 
-func (c *Callback) SendMessage(t string) error {
+func (c *Callback) SendMessage(t string) {
 	c.SendMessageFunc(t)
-	return nil
 }
 
-func (c *Callback) ReplyMessage(t string) error {
+func (c *Callback) ReplyMessage(t string) {
 	c.ReplyMessageFunc(t)
-	return nil
+}
+
+func (c *Callback) SendTyping() {
+	c.SendTypingFunc()
 }

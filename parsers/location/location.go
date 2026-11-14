@@ -17,6 +17,7 @@ const (
 
 //nolint:errcheck
 func Handler(sender *messenger.Sender, r messenger.Receiver) error {
+	r.SendTyping()
 	lat, long := sender.Message.Coordinates[0], sender.Message.Coordinates[1]
 
 	city, weatherText, err := getWeatherByCoords(lat, long)
@@ -50,5 +51,6 @@ func Handler(sender *messenger.Sender, r messenger.Receiver) error {
 		return nil
 	}
 
-	return r.ReplyMessage(resp.Choices[0].Message.Content)
+	r.ReplyMessage(resp.Choices[0].Message.Content)
+	return nil
 }

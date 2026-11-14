@@ -137,6 +137,7 @@ func tavilySearch(query string) (string, error) {
 //nolint:errcheck
 func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 	client := openai.NewClient(os.Getenv(openaiBotToken))
+	r.SendTyping()
 
 	userContent := s.Message.Arg
 	if s.Message.ReplyToMessage != "" {
@@ -175,7 +176,8 @@ func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 
 		// If the model returned a regular response (no tool calls), send it back.
 		if choice.FinishReason != openai.FinishReasonToolCalls || len(choice.Message.ToolCalls) == 0 {
-			return r.SendMessage(choice.Message.Content)
+			r.SendMessage(choice.Message.Content)
+			return nil
 		}
 
 		// Append the assistant message with its tool calls to the conversation.
@@ -207,7 +209,8 @@ func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 		}
 	}
 
-	return r.SendMessage("Не удалось получить ответ. Попробуйте ещё раз.")
+	r.SendMessage("Не удалось получить ответ. Попробуйте ещё раз.")
+	return nil
 }
 
 func init() {

@@ -31,21 +31,6 @@ func (c *chat) GetReceiver() messenger.Receiver {
 	return c.receiver
 }
 
-type Callback struct {
-	sendMessageFunc  func(text string)
-	replyMessageFunc func(text string)
-}
-
-func (c *Callback) SendMessage(t string) error {
-	c.sendMessageFunc(t)
-	return nil
-}
-
-func (c *Callback) ReplyMessage(t string) error {
-	c.replyMessageFunc(t)
-	return nil
-}
-
 type discordInstance struct{}
 
 //nolint:errcheck
@@ -136,6 +121,11 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 				},
 				ReplyMessageFunc: func(text string) {
 					ctx.Reply(text)
+				},
+				SendTypingFunc: func() {
+					if err := ctx.TriggerTyping(); err != nil {
+						slog.Error("counldn't send typing", "err", err)
+					}
 				},
 			},
 		}
