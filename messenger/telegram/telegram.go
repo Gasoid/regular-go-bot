@@ -79,14 +79,8 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 				return
 			}
 
-			path, err := downloadFile(f.FilePath)
-			if err != nil {
-				slog.Error("can't download voice", "err", err)
-				return
-			}
-
 			sender.MessageType = messenger.VoiceMessage
-			sender.Message.VoiceFilePath = path
+			sender.Message.VoiceUrl = fmt.Sprintf(downloadFileUrl, os.Getenv(telegramBotToken), f.FilePath)
 		case len(update.Message.Photo) > 0:
 			sender.MessageType = messenger.Photo
 			for _, p := range update.Message.Photo {

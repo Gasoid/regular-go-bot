@@ -9,6 +9,5 @@ import (
 )
 
 func main() {
-	go httpEndpoint()
 	start()
 }

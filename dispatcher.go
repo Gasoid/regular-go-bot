@@ -1,6 +1,12 @@
 package main
 
 import (
+	"errors"
+	"fmt"
+	"io"
+	"log/slog"
+	"net/http"
+	"os"
 	"strings"
 
 	"github.com/Gasoid/regular-go-bot/v3/commands"
@@ -42,6 +48,23 @@ func (d *Dispatcher) Process(s *messenger.Sender, r messenger.Receiver) error {
 }
 
 func voiceEventHandler(s *messenger.Sender, r messenger.Receiver) error {
+	if s.Message.VoiceUrl != "" {
+		filename := "voice.ogg"
+
+		if _, r, found := strings.CutLast(s.Message.VoiceUrl, "/"); found && strings.Contains(r, ".") {
+			filename = r
+		}
+
+		p, err := downloadFile(s.Message.VoiceUrl, filename)
+		if err != nil {
+			return err
+		}
+
+		s.Message.VoiceFilePath = p
+	}
+
+	defer os.Remove(s.Message.VoiceFilePath)
+
 	return speech.Handler(s, r)
 }
 
@@ -62,6 +85,16 @@ func messageEventHandler(s *messenger.Sender, r messenger.Receiver) error {
 	return nil
 }
 
+func photoEventsHandler(s *messenger.Sender, r messenger.Receiver) error {
+	defer func() {
+		for _, p := range s.Message.PhotoPaths {
+			os.Remove(p)
+		}
+	}()
+
+	return nil
+}
+
 func NewDispatcher() *Dispatcher {
 	dispatcher := new(Dispatcher)
 	dispatcher.commands = make(map[string]commands.Command, len(commands.List()))
@@ -72,6 +105,7 @@ func NewDispatcher() *Dispatcher {
 	dispatcher.eventFuncs[messenger.TextMessage] = messageEventHandler
 	dispatcher.eventFuncs[messenger.ReplyMessage] = messageEventHandler
 	dispatcher.eventFuncs[messenger.Mentioned] = messageEventHandler
+	dispatcher.eventFuncs[messenger.Photo] = photoEventsHandler
 
 	for _, c := range commands.List() {
 		dispatcher.commands[c.Name()] = c
@@ -82,4 +116,39 @@ func NewDispatcher() *Dispatcher {
 	}
 
 	return dispatcher
+}
+
+//nolint:errcheck
+func downloadFile(fileUrl, filename string) (path string, err error) {
+	suffix := strings.Split(filename, ".")
+	if len(suffix) < 2 {
+		return "", errors.New("file name doesn't contain suffix")
+	}
+
+	file, err := os.CreateTemp("", "voice*."+suffix[1])
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	resp, err := http.Get(fileUrl)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// Check server response
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("bad status: %s", resp.Status)
+	}
+
+	// Writer the body to file
+	_, err = io.Copy(file, resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	slog.Debug("downloadFile", "filepath", file.Name())
+
+	return file.Name(), nil
 }

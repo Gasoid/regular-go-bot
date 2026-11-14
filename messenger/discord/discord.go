@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"strings"
 
 	"github.com/Gasoid/regular-go-bot/v3/commands"
 	"github.com/Gasoid/regular-go-bot/v3/messenger"
@@ -55,26 +56,67 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 
 	handler := func(ctx *bot.InteractionContext) {
 
+		if !ctx.IsCommand() {
+			return
+		}
+
 		sender := &messenger.Sender{
 			UserID:      ctx.Message.Author.ID.String(),
 			Username:    ctx.Message.Author.Username,
 			Group:       *ctx.Channel.Name,
 			ChatID:      ctx.Message.ChannelID.String(),
-			MessageType: messenger.TextMessage,
+			MessageType: messenger.Command,
 			Message: messenger.Message{
 				IsGroup: ctx.Channel.Type == channels.ChannelTypeGuildText,
+				Command: ctx.CommandName(),
+			},
+		}
+
+		chats <- &chat{
+			sender: sender,
+			receiver: &messenger.Callback{
+				SendMessageFunc: func(text string) {
+					ctx.Reply(text)
+				},
+				ReplyMessageFunc: func(text string) {
+					ctx.Reply(text)
+				},
+			},
+		}
+	}
+
+	messageHandler := func(ctx *bot.MessageContext) {
+		groupName := ""
+		if ctx.Message.Thread != nil {
+			groupName = *ctx.Message.Thread.Name
+		}
+
+		sender := &messenger.Sender{
+			UserID:      ctx.Message.Author.ID.String(),
+			Username:    ctx.Message.Author.Username,
+			Group:       groupName,
+			ChatID:      ctx.Message.ChannelID.String(),
+			MessageType: messenger.TextMessage,
+			Message: messenger.Message{
+				IsGroup: !ctx.GuildID.IsZero(),
 				Text:    ctx.Message.Content,
-				Command: "",
 			},
 		}
 
 		switch {
-		case ctx.IsCommand():
-			sender.Message.Command = ctx.CommandName()
-			sender.MessageType = messenger.Command
-		case !ctx.IsCommand():
+		case len(ctx.Message.Attachments) > 0:
+			for _, a := range ctx.Message.Attachments {
+				if !strings.HasPrefix(a.ContentType, "audio/") || a.DurationSecs == 0 || a.Waveform == "" {
+					continue
+				}
+
+				sender.Message.VoiceUrl = a.URL
+				sender.MessageType = messenger.VoiceMessage
+				break
+			}
+		case len(ctx.Message.Mentions) > 0:
 			for _, m := range ctx.Message.Mentions {
-				if m.ID == ctx.User().ID {
+				if m.ID == ctx.Bot.User().ID {
 					sender.MessageType = messenger.Mentioned
 					break
 				}
@@ -100,9 +142,11 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 	}
 
 	client := bot.New(token,
-		bot.WithIntents(intents.Guilds),
+		bot.WithIntents(intents.Guilds|intents.GuildMessages|intents.MessageContent),
 		bot.WithRouter(router),
 	)
+
+	client.OnMessageCreate(messageHandler)
 
 	if err := client.Run(); err != nil {
 		return err

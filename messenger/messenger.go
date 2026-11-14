@@ -31,6 +31,7 @@ type Message struct {
 	Text           string
 	Command        string
 	VoiceFilePath  string
+	VoiceUrl       string
 	Coordinates    [2]float64
 	Arg            string
 	PhotoPaths     []string
