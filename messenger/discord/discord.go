@@ -116,7 +116,7 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 				break
 			}
 		case len(ctx.Mentions) > 0:
-			for _, m := range ctx.Message.Mentions {
+			for _, m := range ctx.Mentions {
 				if m.ID == ctx.Bot.User().ID {
 					sender.MessageType = messenger.Mentioned
 					break
