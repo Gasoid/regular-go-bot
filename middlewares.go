@@ -2,6 +2,7 @@ package main
 
 import (
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/Gasoid/regular-go-bot/v3/messenger"
@@ -32,5 +33,14 @@ func metricsMiddleware(h messenger.Handler) messenger.Handler {
 			}
 
 			return err
+		})
+}
+
+func normalizeMiddleware(h messenger.Handler) messenger.Handler {
+	return messenger.HandlerFunc(
+		func(s *messenger.Sender, r messenger.Receiver) error {
+			s.Message.Text = strings.TrimSpace(s.Message.Text)
+			s.Message.ReplyToMessage = strings.TrimSpace(s.Message.ReplyToMessage)
+			return h.Process(s, r)
 		})
 }

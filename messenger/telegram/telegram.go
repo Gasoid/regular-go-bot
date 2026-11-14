@@ -39,25 +39,16 @@ func (c *chat) GetReceiver() messenger.Receiver {
 	return c.receiver
 }
 
-type Callback struct {
-	sendMessageFunc  func(text string)
-	replyMessageFunc func(text string)
-}
-
-func (c *Callback) SendMessage(t string) error {
-	c.sendMessageFunc(t)
-	return nil
-}
-
-func (c *Callback) ReplyMessage(t string) error {
-	c.replyMessageFunc(t)
-	return nil
-}
-
 type tgInstance struct{}
 
 //nolint:errcheck
 func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error {
+	token := os.Getenv(telegramBotToken)
+	if token == "" {
+		slog.Info("No telegram token provided, so telegram has not started")
+		return nil
+	}
+
 	handler := func(ctx context.Context, b *bot.Bot, update *models.Update) {
 		if update.Message == nil {
 			return
@@ -94,14 +85,8 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 				return
 			}
 
-			path, err := downloadFile(f.FilePath)
-			if err != nil {
-				slog.Error("can't download voice", "err", err)
-				return
-			}
-
 			sender.MessageType = messenger.VoiceMessage
-			sender.Message.VoiceFilePath = path
+			sender.Message.VoiceUrl = fmt.Sprintf(downloadFileUrl, os.Getenv(telegramBotToken), f.FilePath)
 		case len(update.Message.Photo) > 0:
 			sender.MessageType = messenger.Photo
 			for _, p := range update.Message.Photo {
@@ -140,16 +125,18 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 			}
 		}
 
+		// b.
+
 		chats <- &chat{
 			sender: sender,
-			receiver: &Callback{
-				sendMessageFunc: func(text string) {
+			receiver: &messenger.Callback{
+				SendMessageFunc: func(text string) {
 					b.SendMessage(ctx, &bot.SendMessageParams{
 						ChatID: update.Message.Chat.ID,
 						Text:   text,
 					})
 				},
-				replyMessageFunc: func(text string) {
+				ReplyMessageFunc: func(text string) {
 					b.SendMessage(ctx, &bot.SendMessageParams{
 						ChatID: update.Message.Chat.ID,
 						Text:   text,
@@ -157,6 +144,12 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 							MessageID: update.Message.ID,
 							ChatID:    update.Message.Chat.ID,
 						},
+					})
+				},
+				SendTypingFunc: func() {
+					b.SendChatAction(ctx, &bot.SendChatActionParams{
+						ChatID: update.Message.Chat.ID,
+						Action: models.ChatActionTyping,
 					})
 				},
 			},
@@ -167,7 +160,7 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 		bot.WithDefaultHandler(handler),
 	}
 
-	b, err := bot.New(os.Getenv(telegramBotToken), opts...)
+	b, err := bot.New(token, opts...)
 	if err != nil {
 		return err
 	}
@@ -182,7 +175,7 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 	}
 	b.SetMyCommands(ctx, &bot.SetMyCommandsParams{Commands: commandList, Scope: &models.BotCommandScopeAllPrivateChats{}})
 
-	slog.Info("service is running")
+	slog.Info("telegram service is running")
 	b.Start(ctx)
 	return nil
 }

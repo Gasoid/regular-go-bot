@@ -2,14 +2,13 @@ package main
 
 import (
 	"fmt"
-	"log/slog"
 	"net/http"
 
 	"github.com/Gasoid/regular-go-bot/v3/metrics"
 )
 
 //nolint:errcheck
-func httpEndpoint() {
+func httpEndpoint(errChan chan<- error) {
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "healthy")
 	})
@@ -17,5 +16,7 @@ func httpEndpoint() {
 	http.Handle("/metrics", metrics.Handler())
 
 	err := http.ListenAndServe(":8080", nil)
-	slog.Error("health endpoint exit with err", "err", err)
+	if err != nil {
+		errChan <- err
+	}
 }

@@ -14,6 +14,7 @@ const (
 )
 
 func Handler(sender *messenger.Sender, r messenger.Receiver) error {
+	r.SendTyping()
 	client := openai.NewClient(os.Getenv(openaiBotToken))
 	ctx := context.Background()
 
@@ -27,5 +28,6 @@ func Handler(sender *messenger.Sender, r messenger.Receiver) error {
 		return err
 	}
 
-	return r.ReplyMessage(resp.Text)
+	r.ReplyMessage(resp.Text)
+	return nil
 }
