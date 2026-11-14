@@ -140,6 +140,7 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 	}
 
 	router := bot.NewRouter()
+
 	for _, c := range commands.List() {
 		options := []interactions.ApplicationCommandOption{}
 		for _, a := range c.Args() {
@@ -147,7 +148,6 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 				Type:        interactions.ApplicationCommandOptionTypeString,
 				Name:        a,
 				Description: "optional",
-				Required:    false,
 			})
 		}
 

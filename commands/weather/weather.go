@@ -24,7 +24,7 @@ func (c *Command) Name() string {
 }
 
 func (c *Command) Args() []string {
-	return []string{"City or location"}
+	return []string{"city"}
 }
 
 func (c *Command) Help() string {
