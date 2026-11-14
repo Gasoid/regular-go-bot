@@ -116,6 +116,7 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 					break
 				}
 			}
+			fallthrough
 		case ctx.ReferencedMessage != nil && ctx.ReferencedMessage.Type == messages.MessageTypeReply:
 			sender.MessageType = messenger.ReplyMessage
 			sender.Message.ReplyToMessage = ctx.ReferencedMessage.Content
