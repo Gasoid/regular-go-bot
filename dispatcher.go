@@ -63,6 +63,7 @@ func voiceEventHandler(s *messenger.Sender, r messenger.Receiver) error {
 		s.Message.VoiceFilePath = p
 	}
 
+	//nolint:errcheck
 	defer os.Remove(s.Message.VoiceFilePath)
 
 	return speech.Handler(s, r)

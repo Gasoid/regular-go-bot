@@ -48,6 +48,7 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 		slog.Info("No telegram token provided, so telegram has not started")
 		return nil
 	}
+
 	handler := func(ctx context.Context, b *bot.Bot, update *models.Update) {
 		if update.Message == nil {
 			return

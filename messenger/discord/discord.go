@@ -88,13 +88,13 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 
 	messageHandler := func(ctx *bot.MessageContext) {
 		groupName := ""
-		if ctx.Message.Thread != nil {
-			groupName = *ctx.Message.Thread.Name
+		if ctx.Thread != nil {
+			groupName = *ctx.Thread.Name
 		}
 
 		sender := &messenger.Sender{
-			UserID:      ctx.Message.Author.ID.String(),
-			Username:    ctx.Message.Author.Username,
+			UserID:      ctx.Author.ID.String(),
+			Username:    ctx.Author.Username,
 			Group:       groupName,
 			ChatID:      ctx.Message.ChannelID.String(),
 			MessageType: messenger.TextMessage,
