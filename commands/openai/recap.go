@@ -84,7 +84,8 @@ func updateRecap(ctx context.Context, client *openai.Client, key, prevRecap, que
 	resp, err := client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
 		Model:               getEnvOrDefault(recapModelEnv, "gpt-5-nano"),
 		MaxCompletionTokens: recapMaxTokens,
-		ReasoningEffort:     openai.ReasoningEffortNone,
+		// gpt-5 models reject "none"; "minimal" is their cheapest tier.
+		ReasoningEffort: openai.ReasoningEffortMinimal,
 		Messages: []openai.ChatCompletionMessage{
 			{Role: openai.ChatMessageRoleSystem, Content: recapPrompt},
 			{Role: openai.ChatMessageRoleUser, Content: exchange},
