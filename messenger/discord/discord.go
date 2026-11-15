@@ -33,8 +33,12 @@ func (c *chat) GetReceiver() messenger.Receiver {
 
 type discordInstance struct{}
 
+func (d *discordInstance) Name() string {
+	return "discord"
+}
+
 //nolint:errcheck
-func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error {
+func (d *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error {
 	token := os.Getenv("DISCORD_TOKEN")
 	if token == "" {
 		slog.Info("No DISCORD_TOKEN provided, so discord has not started")
@@ -60,6 +64,7 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 			Group:       *ctx.Channel.Name,
 			ChatID:      ctx.ChannelID().String(),
 			MessageType: messenger.Command,
+			ServiceName: d.Name(),
 			Message: messenger.Message{
 				IsGroup: ctx.InGuild(),
 				Command: ctx.CommandName(),
@@ -97,6 +102,7 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 			Group:       groupName,
 			ChatID:      ctx.Message.ChannelID.String(),
 			MessageType: messenger.TextMessage,
+			ServiceName: d.Name(),
 			Message: messenger.Message{
 				IsGroup: !ctx.GuildID.IsZero(),
 				Text:    ctx.SanitizeContent(),

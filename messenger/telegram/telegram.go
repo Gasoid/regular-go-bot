@@ -41,6 +41,10 @@ func (c *chat) GetReceiver() messenger.Receiver {
 
 type tgInstance struct{}
 
+func (t *tgInstance) Name() string {
+	return "telegram"
+}
+
 //nolint:errcheck
 func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error {
 	token := os.Getenv(telegramBotToken)
@@ -60,6 +64,7 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 			Group:       update.Message.Chat.Title,
 			ChatID:      strconv.FormatInt(update.Message.Chat.ID, 10),
 			MessageType: messenger.TextMessage,
+			ServiceName: t.Name(),
 			Message: messenger.Message{
 				IsGroup: !update.Message.Chat.IsDirectMessages,
 				Text:    update.Message.Text,

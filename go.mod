@@ -5,18 +5,22 @@ go 1.27
 require (
 	github.com/briandowns/openweathermap v0.20.0
 	github.com/discord-go/discord.go v0.16.1-wid
+	github.com/go-redis/redis_rate/v10 v10.0.1
 	github.com/go-telegram/bot v1.27.0
 	github.com/prometheus/client_golang v1.12.1
+	github.com/redis/go-redis/v9 v9.0.2
 	github.com/sashabaranov/go-openai v1.43.0
 )
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/discord-go/discord.go/dave-go v0.1.0 // indirect
 	github.com/discord-go/discord.go/dave-go/godave v0.1.0 // indirect
 	github.com/discord-go/discord.go/dave-go/mls-go v0.1.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect

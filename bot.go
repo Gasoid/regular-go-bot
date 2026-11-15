@@ -27,7 +27,7 @@ func start() {
 		go func() {
 			err := s.Run(ctx, chats)
 			if err != nil {
-				slog.Error("can't run service", "err", err)
+				slog.Error("can't run service", "service", s.Name(), "err", err)
 			}
 		}()
 	}

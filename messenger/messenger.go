@@ -44,6 +44,7 @@ type Sender struct {
 	Message     Message
 	Group       string
 	ChatID      string
+	ServiceName string
 	MessageType EventType
 }
 
@@ -60,6 +61,7 @@ type Chat interface {
 
 type Service interface {
 	Run(context.Context, chan<- Chat) error
+	Name() string
 }
 
 var (
