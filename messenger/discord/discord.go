@@ -71,10 +71,14 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 			sender: sender,
 			receiver: &messenger.Callback{
 				SendMessageFunc: func(text string) {
-					ctx.Reply(text)
+					if err := ctx.Reply(text); err != nil {
+						slog.Error("couldn't send message", "err", err)
+					}
 				},
 				ReplyMessageFunc: func(text string) {
-					ctx.Reply(text)
+					if err := ctx.Reply(text); err != nil {
+						slog.Error("couldn't reply message", "err", err)
+					}
 				},
 				SendTypingFunc: func() {},
 			},
@@ -127,10 +131,24 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 			sender: sender,
 			receiver: &messenger.Callback{
 				SendMessageFunc: func(text string) {
-					ctx.Reply(text)
+					_, err := ctx.Reply(text)
+					if err != nil {
+						slog.Error("couldn't send message", "err", err)
+					}
 				},
 				ReplyMessageFunc: func(text string) {
-					ctx.Reply(text)
+					_, err := ctx.ReplyComplex(messages.MessageSend{
+						Content: text,
+						MessageReference: &messages.MessageReference{
+							MessageID: ctx.ID,
+							ChannelID: ctx.ChannelID(),
+							GuildID:   ctx.GuildID,
+						},
+						AllowedMentions: &messages.AllowedMentions{},
+					})
+					if err != nil {
+						slog.Error("couldn't reply", "err", err)
+					}
 				},
 				SendTypingFunc: func() {
 					if err := ctx.TriggerTyping(); err != nil {
