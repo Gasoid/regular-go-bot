@@ -4,14 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"os"
 	"slices"
 	"strings"
 	"time"
 
+	"github.com/Gasoid/regular-go-bot/v3/kv"
 	"github.com/Gasoid/regular-go-bot/v3/messenger"
 	"github.com/Gasoid/regular-go-bot/v3/metrics"
-	"github.com/redis/go-redis/v9"
 
 	"github.com/go-redis/redis_rate/v10"
 )
@@ -56,17 +55,13 @@ func normalizeMiddleware(h messenger.Handler) messenger.Handler {
 func rateLimitMiddleware(h messenger.Handler) messenger.Handler {
 	const perMinuteLimit int = 5
 
-	redisAddr := os.Getenv("REDIS_ADDR")
-	if redisAddr == "" {
-		slog.Info("rate limiter has not been set up, because REDIS_ADDR is empty")
+	rdb := kv.GetClient()
+	if rdb == nil {
+		slog.Warn("rate limiter is not enabled")
 		return messenger.HandlerFunc(func(s *messenger.Sender, r messenger.Receiver) error {
 			return h.Process(s, r)
 		})
 	}
-
-	rdb := redis.NewClient(&redis.Options{
-		Addr: redisAddr,
-	})
 
 	limiter := redis_rate.NewLimiter(rdb)
 
