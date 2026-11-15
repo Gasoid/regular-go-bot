@@ -52,7 +52,7 @@ func voiceEventHandler(s *messenger.Sender, r messenger.Receiver) error {
 		filename := "voice.ogg"
 
 		if _, r, found := strings.CutLast(s.Message.VoiceUrl, "/"); found && strings.Contains(r, ".") {
-			filename = r
+			filename, _, _ = strings.CutLast(r, "?")
 		}
 
 		p, err := downloadFile(s.Message.VoiceUrl, filename)
