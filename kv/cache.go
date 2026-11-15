@@ -15,6 +15,7 @@ func Init() {
 	redisAddr := os.Getenv("REDIS_ADDR")
 	if redisAddr == "" {
 		slog.Warn("REDIS_ADDR is empty")
+		return
 	}
 
 	rdb = redis.NewClient(&redis.Options{

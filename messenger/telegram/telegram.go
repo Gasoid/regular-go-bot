@@ -138,14 +138,14 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 				SendMessageFunc: func(text string) {
 					b.SendMessage(ctx, &bot.SendMessageParams{
 						ChatID:    update.Message.Chat.ID,
-						Text:      text,
+						Text:      bot.EscapeMarkdownUnescaped(text),
 						ParseMode: models.ParseModeMarkdown,
 					})
 				},
 				ReplyMessageFunc: func(text string) {
 					b.SendMessage(ctx, &bot.SendMessageParams{
 						ChatID:    update.Message.Chat.ID,
-						Text:      text,
+						Text:      bot.EscapeMarkdownUnescaped(text),
 						ParseMode: models.ParseModeMarkdown,
 						ReplyParameters: &models.ReplyParameters{
 							MessageID: update.Message.ID,

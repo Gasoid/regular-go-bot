@@ -296,16 +296,24 @@ func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 		)
 	}
 
+	key := recapKey(s)
+	prevRecap := loadRecap(context.Background(), key)
+
 	messages := []openai.ChatCompletionMessage{
 		{
 			Role:    openai.ChatMessageRoleSystem,
 			Content: preMessage,
 		},
-		{
-			Role:    openai.ChatMessageRoleUser,
-			Content: userContent,
-		},
 	}
+
+	if prevRecap != "" {
+		messages = append(messages, recapMessage(prevRecap))
+	}
+
+	messages = append(messages, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleUser,
+		Content: userContent,
+	})
 
 	for range maxToolCallIter {
 		resp, err := client.CreateChatCompletion(
@@ -327,6 +335,10 @@ func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 		// If the model returned a regular response (no tool calls), send it back.
 		if choice.FinishReason != openai.FinishReasonToolCalls || len(choice.Message.ToolCalls) == 0 {
 			r.SendMessage(choice.Message.Content)
+			// Summarise the exchange after answering, so the user waits only
+			// for their own reply.
+			goUpdateRecap(client, key, prevRecap, userContent, choice.Message.Content)
+
 			return nil
 		}
 
