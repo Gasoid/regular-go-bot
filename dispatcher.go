@@ -114,6 +114,7 @@ func NewDispatcher() *Dispatcher {
 	}
 
 	dispatcher.middlewares = []func(messenger.Handler) messenger.Handler{
+		rateLimitMiddleware,
 		metricsMiddleware,
 		normalizeMiddleware,
 	}

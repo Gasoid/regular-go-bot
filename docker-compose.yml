@@ -1,15 +1,26 @@
-version: '2.3'
-
 services:
   bot:
     image: ghcr.io/gasoid/regular-go-bot:latest
     restart: always
-    # ports:
-    #   - 8080:8080
-    # environment:
-    #   - GIST_LOGS_URL
-    #   - TOKEN
+    environment:
+      REDIS_ADDR: "valkey:6379"
     env_file:
       - bot.env
     logging:
       driver: syslog
+    depends_on:
+      valkey:
+        condition: service_healthy
+  valkey:
+    image: valkey/valkey:9.1
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "PING"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 5
+      start_period: 1s
+
+volumes:
+  redis-data:
