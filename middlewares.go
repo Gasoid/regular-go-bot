@@ -85,6 +85,7 @@ func rateLimitMiddleware(h messenger.Handler) messenger.Handler {
 			if s.MessageType == messenger.Command {
 				r.SendMessage(fmt.Sprintf("Слишком часто. Попробуйте через %s.", res.RetryAfter.Round(time.Second)))
 			}
+			slog.Info("message from user is not passed by rate limiter", "service", s.ServiceName, "username", s.Username)
 			return nil
 		}
 
