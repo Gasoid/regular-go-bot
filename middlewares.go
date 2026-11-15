@@ -58,6 +58,7 @@ func rateLimitMiddleware(h messenger.Handler) messenger.Handler {
 
 	redisAddr := os.Getenv("REDIS_ADDR")
 	if redisAddr == "" {
+		slog.Info("rate limiter has not been set up, because REDIS_ADDR is empty")
 		return messenger.HandlerFunc(func(s *messenger.Sender, r messenger.Receiver) error {
 			return h.Process(s, r)
 		})
