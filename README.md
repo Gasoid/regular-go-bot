@@ -8,11 +8,8 @@ You have to provide 4 env variables:
 - OPENAI_TOKEN - chatgpt token
 - OWM_API_KEY - api key for weather command
 - DEFAULT_WEATHER_CITIES - default cities, e.g. Berlin,Chicago,Los Angeles
-
-## How it works
-
-<img width="511" alt="Screenshot 2022-07-17 at 21 12 16" src="https://user-images.githubusercontent.com/833157/179421331-6f380348-994a-433f-8475-415134d8d169.png">
-
+- TAVILY_API_KEY - api key for tavily search
+- OPENAI_MODEL - optional, default is luna
 
 ## Metrics
 Prometheus metrics are exposed on 8080 port: http://localhost:8080/metrics
@@ -34,12 +31,6 @@ curl http://localhost:8080/health
 ```
 go mod download
 go build ./
-```
-
-or
-
-```
-docker build -t bot:test ./
 ```
 
 ## License
