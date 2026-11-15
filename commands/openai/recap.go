@@ -18,7 +18,7 @@ const (
 	recapModelEnv = "OPENAI_RECAP_MODEL"
 	// recapTTL is how long a conversation stays "open". Silence longer than
 	// this drops the context, which doubles as cleanup: no key outlives it.
-	recapTTL = 30 * time.Minute
+	recapTTL = 24 * time.Hour
 	// recapTimeout bounds the summarising call, which runs detached from the
 	// request the user is waiting on.
 	recapTimeout   = 30 * time.Second
