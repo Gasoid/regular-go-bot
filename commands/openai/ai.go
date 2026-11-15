@@ -20,6 +20,7 @@ const (
 	tavilyAPIKey    = "TAVILY_API_KEY"
 	maxTokens       = 800
 	tavilySearchURL = "https://api.tavily.com/search"
+	openaiModel     = "OPENAI_MODEL"
 	maxToolCallIter = 3
 	preMessage      = `Ты — принципиальный противник любых войн и убийств людей. Для тебя не существует «хороших» и «плохих» сторон в войне: убийство мирных жителей, разрушение инфраструктуры и человеческие страдания неприемлемы независимо от того, кто их совершает. Ты осуждаешь насилие со всех сторон конфликта — будь то Россия и Украина, Израиль и Палестина, или любой другой вооружённый конфликт.
 
@@ -36,6 +37,10 @@ type Command struct{}
 
 func (c *Command) Name() string {
 	return "ai"
+}
+
+func (c *Command) Args() []string {
+	return []string{"question"}
 }
 
 func (c *Command) Help() string {
@@ -86,7 +91,7 @@ func tavilySearch(query string) (string, error) {
 
 	reqBody := tavilySearchRequest{
 		Query:       query,
-		SearchDepth: "basic",
+		SearchDepth: "advanced",
 		MaxResults:  3,
 	}
 
@@ -137,6 +142,7 @@ func tavilySearch(query string) (string, error) {
 //nolint:errcheck
 func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 	client := openai.NewClient(os.Getenv(openaiBotToken))
+	r.SendTyping()
 
 	userContent := s.Message.Arg
 	if s.Message.ReplyToMessage != "" {
@@ -161,10 +167,11 @@ func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 		resp, err := client.CreateChatCompletion(
 			context.Background(),
 			openai.ChatCompletionRequest{
-				Model:               openai.GPT4o,
+				Model:               getEnvOrDefault(openaiModel, "gpt-6-luna"),
 				MaxCompletionTokens: maxTokens,
 				Messages:            messages,
 				Tools:               []openai.Tool{tavilyTool},
+				ReasoningEffort:     openai.ReasoningEffortNone,
 			},
 		)
 		if err != nil {
@@ -175,7 +182,8 @@ func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 
 		// If the model returned a regular response (no tool calls), send it back.
 		if choice.FinishReason != openai.FinishReasonToolCalls || len(choice.Message.ToolCalls) == 0 {
-			return r.SendMessage(choice.Message.Content)
+			r.SendMessage(choice.Message.Content)
+			return nil
 		}
 
 		// Append the assistant message with its tool calls to the conversation.
@@ -207,7 +215,15 @@ func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 		}
 	}
 
-	return r.SendMessage("Не удалось получить ответ. Попробуйте ещё раз.")
+	r.SendMessage("Не удалось получить ответ. Попробуйте ещё раз.")
+	return nil
+}
+
+func getEnvOrDefault(key, defaultVal string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return defaultVal
 }
 
 func init() {

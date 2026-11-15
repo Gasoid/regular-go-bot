@@ -22,6 +22,10 @@ func (c *Command) Help() string {
 	return "the command drops a joke"
 }
 
+func (c *Command) Args() []string {
+	return nil
+}
+
 //nolint:errcheck
 func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 	req, err := http.NewRequest("GET", jokeUrl, nil)

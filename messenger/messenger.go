@@ -31,6 +31,7 @@ type Message struct {
 	Text           string
 	Command        string
 	VoiceFilePath  string
+	VoiceUrl       string
 	Coordinates    [2]float64
 	Arg            string
 	PhotoPaths     []string
@@ -47,8 +48,9 @@ type Sender struct {
 }
 
 type Receiver interface {
-	SendMessage(text string) error
-	ReplyMessage(text string) error
+	SendMessage(text string)
+	ReplyMessage(text string)
+	SendTyping()
 }
 
 type Chat interface {
@@ -70,4 +72,22 @@ func RegisterService(s Service) {
 
 func ListServices() []Service {
 	return services
+}
+
+type Callback struct {
+	SendMessageFunc  func(text string)
+	ReplyMessageFunc func(text string)
+	SendTypingFunc   func()
+}
+
+func (c *Callback) SendMessage(t string) {
+	c.SendMessageFunc(t)
+}
+
+func (c *Callback) ReplyMessage(t string) {
+	c.ReplyMessageFunc(t)
+}
+
+func (c *Callback) SendTyping() {
+	c.SendTypingFunc()
 }

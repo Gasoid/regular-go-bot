@@ -10,6 +10,7 @@ type Command interface {
 	Handler(*messenger.Sender, messenger.Receiver) error
 	Help() string
 	Name() string
+	Args() []string
 }
 
 var (

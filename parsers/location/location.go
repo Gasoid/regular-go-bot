@@ -2,7 +2,6 @@ package location
 
 import (
 	"fmt"
-	"log/slog"
 	"os"
 
 	"context"
@@ -13,10 +12,12 @@ import (
 
 const (
 	openaiBotToken = "OPENAI_TOKEN"
+	openaiModel    = "OPENAI_MODEL"
 )
 
 //nolint:errcheck
 func Handler(sender *messenger.Sender, r messenger.Receiver) error {
+	r.SendTyping()
 	lat, long := sender.Message.Coordinates[0], sender.Message.Coordinates[1]
 
 	city, weatherText, err := getWeatherByCoords(lat, long)
@@ -30,8 +31,9 @@ func Handler(sender *messenger.Sender, r messenger.Receiver) error {
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model:               openai.GPT4oMini,
+			Model:               model(),
 			MaxCompletionTokens: 250,
+			ReasoningEffort:     openai.ReasoningEffortNone,
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    openai.ChatMessageRoleUser,
@@ -46,9 +48,16 @@ func Handler(sender *messenger.Sender, r messenger.Receiver) error {
 	)
 
 	if err != nil {
-		slog.Error("ChatCompletion error", "err", err)
-		return nil
+		return err
 	}
 
-	return r.ReplyMessage(resp.Choices[0].Message.Content)
+	r.ReplyMessage(resp.Choices[0].Message.Content)
+	return nil
+}
+
+func model() string {
+	if v := os.Getenv(openaiModel); v != "" {
+		return v
+	}
+	return "gpt-6-luna"
 }

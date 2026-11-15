@@ -32,6 +32,9 @@ func start() {
 		}()
 	}
 
+	errChan := make(chan error, 1)
+	go httpEndpoint(errChan)
+
 	for {
 		slog.Debug("waiting for incoming messages")
 		select {
@@ -43,6 +46,10 @@ func start() {
 		case <-ctx.Done():
 			cancel()
 			slog.Info("Graceful shutdown")
+			return
+		case err := <-errChan:
+			slog.Error("health endpoint returns error", "error", err)
+			cancel()
 			return
 		}
 	}

@@ -23,6 +23,10 @@ func (c *Command) Name() string {
 	return "weather"
 }
 
+func (c *Command) Args() []string {
+	return []string{"city"}
+}
+
 func (c *Command) Help() string {
 	return "weather forecast, e.g.: /weather Los Angeles, US"
 }
