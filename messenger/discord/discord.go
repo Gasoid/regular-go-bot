@@ -95,7 +95,7 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 			MessageType: messenger.TextMessage,
 			Message: messenger.Message{
 				IsGroup: !ctx.GuildID.IsZero(),
-				Text:    ctx.Content,
+				Text:    ctx.SanitizeContent(),
 			},
 		}
 
@@ -120,7 +120,7 @@ func (t *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 			fallthrough
 		case ctx.ReferencedMessage != nil && ctx.ReferencedMessage.Type == messages.MessageTypeReply:
 			sender.MessageType = messenger.ReplyMessage
-			sender.Message.ReplyToMessage = ctx.ReferencedMessage.Content
+			sender.Message.ReplyToMessage = ctx.ReferencedMessage.SanitizeContent()
 		}
 
 		chats <- &chat{

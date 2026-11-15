@@ -41,6 +41,7 @@ func normalizeMiddleware(h messenger.Handler) messenger.Handler {
 		func(s *messenger.Sender, r messenger.Receiver) error {
 			s.Message.Text = strings.TrimSpace(s.Message.Text)
 			s.Message.ReplyToMessage = strings.TrimSpace(s.Message.ReplyToMessage)
+			s.Message.Arg = strings.TrimSpace(s.Message.Arg)
 			return h.Process(s, r)
 		})
 }
