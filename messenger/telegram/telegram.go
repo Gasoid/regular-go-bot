@@ -127,10 +127,9 @@ func (t *tgInstance) Run(ctx context.Context, chats chan<- messenger.Chat) error
 
 			if strings.HasPrefix(update.Message.Text, "@"+u.Username) {
 				sender.MessageType = messenger.Mentioned
+				sender.Message.Text, _ = strings.CutPrefix(sender.Message.Text, "@"+u.Username)
 			}
 		}
-
-		// b.
 
 		chats <- &chat{
 			sender: sender,
