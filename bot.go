@@ -52,6 +52,7 @@ func start() {
 
 			if err := healthSrv.Shutdown(shutdownCtx); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				slog.Error("health srv couldn't exit gracefully", "error", err)
+				//nolint:errcheck
 				healthSrv.Close()
 			}
 			slog.Info("Graceful shutdown")
