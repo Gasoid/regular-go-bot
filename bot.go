@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/Gasoid/regular-go-bot/v3/messenger"
 )
@@ -16,8 +19,8 @@ const (
 
 func start() {
 	slog.SetLogLoggerLevel(slog.LevelDebug)
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer cancel()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
 	dispatcher := NewDispatcher()
 
@@ -44,12 +47,16 @@ func start() {
 				slog.Error("handler returns error", "error", err)
 			}
 		case <-ctx.Done():
-			cancel()
+			shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+			defer cancel()
+
+			healthSrv.Shutdown(shutdownCtx)
 			slog.Info("Graceful shutdown")
 			return
 		case err := <-errChan:
-			slog.Error("health endpoint returns error", "error", err)
-			cancel()
+			if !errors.Is(err, http.ErrServerClosed) {
+				slog.Error("health endpoint returns error", "error", err)
+			}
 			return
 		}
 	}
