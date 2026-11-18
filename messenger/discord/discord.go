@@ -128,7 +128,9 @@ func (d *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 				}
 			}
 			fallthrough
-		case ctx.ReferencedMessage != nil && ctx.ReferencedMessage.Type == messages.MessageTypeReply:
+		case ctx.ReferencedMessage != nil &&
+			ctx.ReferencedMessage.Type == messages.MessageTypeReply &&
+			ctx.ReferencedMessage.Author.ID == ctx.Bot.User().ID:
 			sender.MessageType = messenger.ReplyMessage
 			sender.Message.ReplyToMessage = ctx.ReferencedMessage.SanitizeContent()
 		}
