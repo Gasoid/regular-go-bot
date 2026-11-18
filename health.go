@@ -7,6 +7,12 @@ import (
 	"github.com/Gasoid/regular-go-bot/v3/metrics"
 )
 
+var (
+	healthSrv = &http.Server{
+		Addr: ":8080",
+	}
+)
+
 //nolint:errcheck
 func httpEndpoint(errChan chan<- error) {
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -15,7 +21,7 @@ func httpEndpoint(errChan chan<- error) {
 
 	http.Handle("/metrics", metrics.Handler())
 
-	err := http.ListenAndServe(":8080", nil)
+	err := healthSrv.ListenAndServe()
 	if err != nil {
 		errChan <- err
 	}
