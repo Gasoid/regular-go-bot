@@ -50,7 +50,10 @@ func start() {
 			shutdownCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
 
-			healthSrv.Shutdown(shutdownCtx)
+			if err := healthSrv.Shutdown(shutdownCtx); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				slog.Error("health srv couldn't exit gracefully", "error", err)
+				healthSrv.Close()
+			}
 			slog.Info("Graceful shutdown")
 			return
 		case err := <-errChan:
