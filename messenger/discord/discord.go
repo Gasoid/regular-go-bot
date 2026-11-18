@@ -127,7 +127,6 @@ func (d *discordInstance) Run(ctx context.Context, chats chan<- messenger.Chat) 
 					break
 				}
 			}
-			fallthrough
 		case ctx.ReferencedMessage != nil &&
 			ctx.ReferencedMessage.Type == messages.MessageTypeReply &&
 			ctx.ReferencedMessage.Author.ID == ctx.Bot.User().ID:
