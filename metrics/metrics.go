@@ -7,7 +7,7 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	otelMetric "go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/sdk/metric"
 )
@@ -80,7 +80,7 @@ func MessagesInc(ctx context.Context) {
 
 func Setup() error {
 	ctx := context.Background()
-	exp, err := otlpmetricgrpc.New(ctx)
+	exp, err := otlpmetrichttp.New(ctx)
 	if err != nil {
 		return err
 	}
