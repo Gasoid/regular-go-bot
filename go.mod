@@ -7,6 +7,7 @@ require (
 	github.com/discord-go/discord.go v0.16.1-wid
 	github.com/go-redis/redis_rate/v10 v10.0.1
 	github.com/go-telegram/bot v1.27.0
+	github.com/gofurry/steam-go v1.3.12
 	github.com/prometheus/client_golang v1.12.1
 	github.com/redis/go-redis/v9 v9.0.2
 	github.com/sashabaranov/go-openai v1.43.0
@@ -27,7 +28,7 @@ require (
 	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
-	golang.org/x/time v0.10.0 // indirect
+	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/protobuf v1.26.0 // indirect
 )
