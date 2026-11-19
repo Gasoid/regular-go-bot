@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
+	"sort"
 	"strings"
 	"time"
 
@@ -15,17 +15,12 @@ import (
 	"github.com/gofurry/steam-go/api/playerservice"
 	"github.com/gofurry/steam-go/api/steamuser"
 	"github.com/gofurry/steam-go/steamid"
-	"github.com/gofurry/steam-go/web/community"
-	"github.com/gofurry/steam-go/web/market"
 )
 
 const (
-	appIDCS2  = 730
-	appIDDota = 570
-
-	cs2InventoryContextID = "2"
-
 	communityVisibilityPublic = 3
+
+	topGamesCount = 3
 )
 
 type Command struct{}
@@ -97,24 +92,22 @@ func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 	}
 
 	if summary.CommunityVisibilityState != communityVisibilityPublic {
-		b.WriteString("🔒 profile is private, game stats and inventory are unavailable\n")
+		b.WriteString("🔒 profile is private, game stats are unavailable\n")
 		r.SendMessage(b.String())
 		return nil
 	}
 
-	cs2Hours, dotaHours := fetchPlaytime(ctx, client, steamID)
-	fmt.Fprintf(&b, "🎮 CS2: %s · Dota 2: %s\n", formatHours(cs2Hours), formatHours(dotaHours))
-
-	inventoryValue, itemCount, unvaluedCount, invErr := estimateCS2InventoryValue(ctx, client, steamID)
+	topGames, gamesErr := fetchTopGames(ctx, client, steamID)
 	switch {
-	case invErr != nil:
-		b.WriteString("💰 CS2 inventory: unavailable\n")
+	case gamesErr != nil:
+		b.WriteString("🎮 top games: unavailable\n")
+	case len(topGames) == 0:
+		b.WriteString("🎮 top games: no games in library\n")
 	default:
-		fmt.Fprintf(&b, "💰 CS2 inventory: ~$%.2f (%d items", inventoryValue, itemCount)
-		if unvaluedCount > 0 {
-			fmt.Fprintf(&b, ", %d not priced", unvaluedCount)
+		b.WriteString("🎮 top games:\n")
+		for _, g := range topGames {
+			fmt.Fprintf(&b, "  • %s: %s\n", g.Name, formatHours(g.PlaytimeForever))
 		}
-		b.WriteString(")\n")
 	}
 
 	r.SendMessage(b.String())
@@ -181,23 +174,21 @@ func fetchCoreInfo(ctx context.Context, client *steam.Client, steamID string) (*
 	return &player, bans, nil
 }
 
-func fetchPlaytime(ctx context.Context, client *steam.Client, steamID string) (cs2Minutes, dotaMinutes int) {
-	resp, err := client.API.PlayerService.GetOwnedGames(ctx, steamID, &playerservice.GetOwnedGamesOptions{
-		AppIDsFilter: []uint32{appIDCS2, appIDDota},
-	})
+func fetchTopGames(ctx context.Context, client *steam.Client, steamID string) ([]playerservice.OwnedGame, error) {
+	resp, err := client.API.PlayerService.GetOwnedGames(ctx, steamID, nil)
 	if err != nil {
-		return -1, -1
+		return nil, err
 	}
-	cs2Minutes, dotaMinutes = -1, -1
-	for _, game := range resp.Response.Games {
-		switch game.AppID {
-		case appIDCS2:
-			cs2Minutes = game.PlaytimeForever
-		case appIDDota:
-			dotaMinutes = game.PlaytimeForever
-		}
+
+	games := resp.Response.Games
+	sort.Slice(games, func(i, j int) bool {
+		return games[i].PlaytimeForever > games[j].PlaytimeForever
+	})
+
+	if len(games) > topGamesCount {
+		games = games[:topGamesCount]
 	}
-	return cs2Minutes, dotaMinutes
+	return games, nil
 }
 
 func formatHours(minutes int) string {
@@ -225,77 +216,6 @@ func countryFlag(countryCode string) string {
 		return "🏳️"
 	}
 	return string(rune(0x1F1E6+int(first-'A'))) + string(rune(0x1F1E6+int(second-'A')))
-}
-
-func estimateCS2InventoryValue(ctx context.Context, client *steam.Client, steamID string) (value float64, itemCount, unvaluedCount int, err error) {
-	inventory, err := client.Web.Community.GetInventory(ctx, steamID, appIDCS2, cs2InventoryContextID, &community.GetInventoryOptions{
-		Count: 2000,
-	})
-	if err != nil {
-		return 0, 0, 0, err
-	}
-	if inventory.Success != 1 {
-		return 0, 0, 0, errors.New("inventory unavailable: " + inventory.Error)
-	}
-
-	descriptionByKey := make(map[string]community.InventoryItem, len(inventory.Descriptions))
-	for _, d := range inventory.Descriptions {
-		descriptionByKey[d.ClassID+"_"+d.InstanceID] = d
-	}
-
-	countByHashName := make(map[string]int)
-	for _, asset := range inventory.Assets {
-		desc, ok := descriptionByKey[asset.ClassID+"_"+asset.InstanceID]
-		if !ok || desc.Marketable != 1 || desc.MarketHashName == "" {
-			continue
-		}
-		amount, convErr := strconv.Atoi(asset.Amount)
-		if convErr != nil || amount <= 0 {
-			amount = 1
-		}
-		countByHashName[desc.MarketHashName] += amount
-		itemCount += amount
-	}
-
-	if len(countByHashName) == 0 {
-		return 0, 0, 0, nil
-	}
-
-	items := make([]market.PriceOverviewBatchItem, 0, len(countByHashName))
-	for name := range countByHashName {
-		items = append(items, market.PriceOverviewBatchItem{AppID: appIDCS2, MarketHashName: name})
-	}
-
-	results, err := client.Web.Market.GetPriceOverviewBatch(ctx, items, &market.GetPriceOverviewBatchOptions{
-		Currency:      1,
-		MaxConcurrent: 4,
-	})
-	if err != nil {
-		return 0, itemCount, len(countByHashName), nil
-	}
-
-	for _, res := range results {
-		if res.Err != nil || !res.Response.Success {
-			unvaluedCount += countByHashName[res.Item.MarketHashName]
-			continue
-		}
-		price, priceErr := parsePrice(res.Response.LowestPrice)
-		if priceErr != nil {
-			unvaluedCount += countByHashName[res.Item.MarketHashName]
-			continue
-		}
-		value += price * float64(countByHashName[res.Item.MarketHashName])
-	}
-
-	return value, itemCount, unvaluedCount, nil
-}
-
-func parsePrice(raw string) (float64, error) {
-	cleaned := strings.NewReplacer("$", "", "€", "", "£", "", ",", "").Replace(strings.TrimSpace(raw))
-	if cleaned == "" {
-		return 0, errors.New("empty price")
-	}
-	return strconv.ParseFloat(cleaned, 64)
 }
 
 func init() {
