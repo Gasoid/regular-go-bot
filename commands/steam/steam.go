@@ -212,6 +212,7 @@ type faceitPlayerResponse struct {
 	Games map[string]faceitGameStats `json:"games"`
 }
 
+//nolint:errcheck
 func fetchFaceitStats(ctx context.Context, apiKey, steamID string) (*faceitGameStats, error) {
 	url := fmt.Sprintf("%s/players?game=%s&game_player_id=%s", faceitApiBaseURL, faceitCS2Game, steamID)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
