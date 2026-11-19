@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"time"
 
+	"go.opentelemetry.io/contrib/instrumentation/host"
+	"go.opentelemetry.io/contrib/instrumentation/runtime"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
@@ -135,6 +137,13 @@ func Setup() error {
 		otelMetric.WithExplicitBucketBoundaries(.005, .01, .025, .05, .075, .1, .25, .5, .75, 1, 2.5, 5, 7.5, 10),
 	)
 	if err != nil {
+		return err
+	}
+
+	if err := runtime.Start(); err != nil {
+		return err
+	}
+	if err := host.Start(); err != nil {
 		return err
 	}
 
