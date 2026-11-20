@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/Gasoid/regular-go-bot/v3/messenger"
+	"github.com/Gasoid/regular-go-bot/v3/metrics"
 )
 
 const (
@@ -55,6 +56,9 @@ func start() {
 				//nolint:errcheck
 				healthSrv.Close()
 			}
+
+			metrics.Shutdown()
+
 			slog.Info("Graceful shutdown")
 			return
 		case err := <-errChan:

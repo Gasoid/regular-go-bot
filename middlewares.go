@@ -32,10 +32,25 @@ func metricsMiddleware(h messenger.Handler) messenger.Handler {
 			start := time.Now()
 			err := h.Process(s, r)
 
+			ctx := context.Background()
+			metrics.MessagesInc(ctx)
+
 			switch s.MessageType {
 			case messenger.Command:
-				metrics.CommandInc(s.Message.Command, err)
-				metrics.CommandDuration(s.Message.Command, time.Since(start))
+				metrics.CommandInc(ctx, s.Message.Command, err == nil)
+				metrics.CommandDuration(ctx, s.Message.Command, time.Since(start))
+			case messenger.Mentioned:
+				metrics.ParserInc(ctx, "mentioned", err == nil)
+				metrics.ParserDuration(ctx, "mentioned", time.Since(start))
+			case messenger.ReplyMessage:
+				metrics.ParserInc(ctx, "reply", err == nil)
+				metrics.ParserDuration(ctx, "reply", time.Since(start))
+			case messenger.VoiceMessage:
+				metrics.ParserInc(ctx, "voice", err == nil)
+				metrics.ParserDuration(ctx, "voice", time.Since(start))
+			case messenger.Location:
+				metrics.ParserInc(ctx, "location", err == nil)
+				metrics.ParserDuration(ctx, "location", time.Since(start))
 			}
 
 			return err
