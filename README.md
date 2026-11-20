@@ -2,12 +2,13 @@
 
 
 ## Settings / Env variables
-You have to provide 4 env variables:
+You have to provide env variables:
 
-- TELEGRAM_BOT_TOKEN - telegram token
-- DISCORD_TOKEN - discord token
-- STEAM_API_KEY - api key for steam command
-- FACEIT_API_KEY - api key for faceit command
+- TELEGRAM_BOT_TOKEN - telegram token (optional)
+- DISCORD_TOKEN - discord token (optional)
+- STEAM_API_KEY - api key for steam command (optional)
+- FACEIT_API_KEY - api key for faceit command (optional)
+- LEETIFY_API_KEY - api key for leetify stats in steam command (optional)
 - OPENAI_TOKEN - chatgpt token
 - OWM_API_KEY - api key for weather command
 - DEFAULT_WEATHER_CITIES - default cities, e.g. Berlin,Chicago,Los Angeles
