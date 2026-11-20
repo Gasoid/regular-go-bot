@@ -2,10 +2,8 @@ package steam
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"sort"
 	"strings"
@@ -23,13 +21,6 @@ const (
 	communityVisibilityPublic = 3
 
 	topGamesCount = 3
-
-	faceitApiKeyEnv  = "FACEIT_API_KEY"
-	faceitApiBaseURL = "https://open.faceit.com/data/v4"
-	faceitCS2Game    = "cs2"
-
-	leetifyApiKeyEnv  = "LEETIFY_API_KEY"
-	leetifyApiBaseURL = "https://api-public.cs-prod.leetify.com"
 )
 
 type Command struct{}
@@ -125,9 +116,28 @@ func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 		}
 	}
 
-	if leetify, err := fetchLeetifyProfile(ctx, steamID); err == nil && leetify != nil {
-		fmt.Fprintf(&b, "📊 Leetify: rating %.2f, premier %d, faceit %d, winrate %.1f%% (%d matches)\n",
-			leetify.Ranks.Leetify, leetify.Ranks.Premier, leetify.Ranks.Faceit, leetify.Winrate*100, leetify.TotalMatches)
+	if leetify, err := fetchLeetifyStats(ctx, steamID); err == nil && leetify != nil {
+		fmt.Fprintf(&b, "📊 Leetify: rating %.2f, winrate %.1f%% (%d matches)\n",
+			leetify.profile.Ranks.Leetify, leetify.profile.Winrate*100, leetify.profile.TotalMatches)
+
+		switch {
+		case leetify.profile.Ranks.Premier > 0:
+			fmt.Fprintf(&b, "  premier: %d\n", leetify.profile.Ranks.Premier)
+		case len(leetify.premierHistory) > 0:
+			b.WriteString("  premier (past seasons):")
+			for _, m := range leetify.premierHistory {
+				fmt.Fprintf(&b, " %d", m.Rank)
+			}
+			b.WriteString("\n")
+		}
+
+		if leetify.avgKillsOK {
+			fmt.Fprintf(&b, "  avg kills (last %d matches): %.1f\n", leetifyAvgKillsMatches, leetify.avgKills)
+		}
+
+		if len(leetify.form) > 0 {
+			fmt.Fprintf(&b, "  form: %s\n", formatForm(leetify.form))
+		}
 	}
 
 	r.SendMessage(b.String())
@@ -209,92 +219,6 @@ func fetchTopGames(ctx context.Context, client *steam.Client, steamID string) ([
 		games = games[:topGamesCount]
 	}
 	return games, nil
-}
-
-type faceitGameStats struct {
-	SkillLevel int `json:"skill_level"`
-	FaceitElo  int `json:"faceit_elo"`
-}
-
-type faceitPlayerResponse struct {
-	Games map[string]faceitGameStats `json:"games"`
-}
-
-//nolint:errcheck
-func fetchFaceitStats(ctx context.Context, apiKey, steamID string) (*faceitGameStats, error) {
-	url := fmt.Sprintf("%s/players?game=%s&game_player_id=%s", faceitApiBaseURL, faceitCS2Game, steamID)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Authorization", "Bearer "+apiKey)
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusNotFound {
-		return nil, nil
-	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("faceit api returned status %d", resp.StatusCode)
-	}
-
-	var player faceitPlayerResponse
-	if err := json.NewDecoder(resp.Body).Decode(&player); err != nil {
-		return nil, err
-	}
-
-	cs2Stats, ok := player.Games[faceitCS2Game]
-	if !ok {
-		return nil, nil
-	}
-	return &cs2Stats, nil
-}
-
-type leetifyRanks struct {
-	Leetify float64 `json:"leetify"`
-	Premier int     `json:"premier"`
-	Faceit  int     `json:"faceit"`
-}
-
-type leetifyProfileResponse struct {
-	Winrate      float64      `json:"winrate"`
-	TotalMatches int          `json:"total_matches"`
-	Ranks        leetifyRanks `json:"ranks"`
-}
-
-//nolint:errcheck
-func fetchLeetifyProfile(ctx context.Context, steamID string) (*leetifyProfileResponse, error) {
-	url := fmt.Sprintf("%s/v3/profile?steam64_id=%s", leetifyApiBaseURL, steamID)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
-	}
-	if leetifyKey := os.Getenv(leetifyApiKeyEnv); leetifyKey != "" {
-		req.Header.Set("Authorization", "Bearer "+leetifyKey)
-	}
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusNotFound {
-		return nil, nil
-	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("leetify api returned status %d", resp.StatusCode)
-	}
-
-	var profile leetifyProfileResponse
-	if err := json.NewDecoder(resp.Body).Decode(&profile); err != nil {
-		return nil, err
-	}
-	return &profile, nil
 }
 
 func formatHours(minutes int) string {
