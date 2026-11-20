@@ -48,6 +48,9 @@ func metricsMiddleware(h messenger.Handler) messenger.Handler {
 			case messenger.VoiceMessage:
 				metrics.ParserInc(ctx, "voice", err == nil)
 				metrics.ParserDuration(ctx, "voice", time.Since(start))
+			case messenger.Location:
+				metrics.ParserInc(ctx, "location", err == nil)
+				metrics.ParserDuration(ctx, "location", time.Since(start))
 			}
 
 			return err

@@ -24,7 +24,7 @@ var (
 	meter             = otel.Meter("regular-bot")
 )
 
-func CommandInc(ctx context.Context, command string, succeded bool) {
+func CommandInc(ctx context.Context, command string, succeeded bool) {
 	commandExecutions.Add(ctx, 1,
 		otelMetric.WithAttributes(
 			attribute.KeyValue{
@@ -32,14 +32,14 @@ func CommandInc(ctx context.Context, command string, succeded bool) {
 				Value: attribute.StringValue(command),
 			},
 			attribute.KeyValue{
-				Key:   "succeded",
-				Value: attribute.BoolValue(succeded),
+				Key:   "succeeded",
+				Value: attribute.BoolValue(succeeded),
 			},
 		),
 	)
 }
 
-func ParserInc(ctx context.Context, parser string, succeded bool) {
+func ParserInc(ctx context.Context, parser string, succeeded bool) {
 	parserExecutions.Add(ctx, 1,
 		otelMetric.WithAttributes(
 			attribute.KeyValue{
@@ -47,8 +47,8 @@ func ParserInc(ctx context.Context, parser string, succeded bool) {
 				Value: attribute.StringValue(parser),
 			},
 			attribute.KeyValue{
-				Key:   "succeded",
-				Value: attribute.BoolValue(succeded),
+				Key:   "succeeded",
+				Value: attribute.BoolValue(succeeded),
 			},
 		),
 	)

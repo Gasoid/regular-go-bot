@@ -18,6 +18,7 @@ import (
 func main() {
 	if err := metrics.Setup(); err != nil {
 		slog.Error("couldn't setup and initialize metrics", "err", err)
+		return
 	}
 
 	kv.Init()
