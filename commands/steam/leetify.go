@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"slices"
 	"strings"
 )
 
@@ -69,6 +70,7 @@ func fetchLeetifyStats(ctx context.Context, steamID string) (*leetifyStats, erro
 	if err != nil {
 		return nil, err
 	}
+
 	if profile == nil {
 		return nil, nil
 	}
@@ -78,11 +80,13 @@ func fetchLeetifyStats(ctx context.Context, steamID string) (*leetifyStats, erro
 	stats.form = formFromMatches(profile.RecentMatches, leetifyFormMatches)
 
 	matches, err := fetchLeetifyMatches(ctx, steamID)
-	if err == nil {
-		if avg, ok := avgKillsFromMatches(matches, steamID, leetifyAvgKillsMatches); ok {
-			stats.avgKills = avg
-			stats.avgKillsOK = true
-		}
+	if err != nil {
+		return nil, err
+	}
+
+	if avg, ok := avgKillsFromMatches(matches, steamID, leetifyAvgKillsMatches); ok {
+		stats.avgKills = avg
+		stats.avgKillsOK = true
 	}
 
 	return stats, nil
@@ -110,7 +114,7 @@ func formFromMatches(matches []leetifyRecentMatch, n int) []string {
 		matches = matches[:n]
 	}
 	form := make([]string, 0, len(matches))
-	for i := len(matches) - 1; i >= 0; i-- {
+	for i := range slices.Backward(matches) {
 		form = append(form, matches[i].Outcome)
 	}
 	return form
