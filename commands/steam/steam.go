@@ -27,6 +27,9 @@ const (
 	faceitApiKeyEnv  = "FACEIT_API_KEY"
 	faceitApiBaseURL = "https://open.faceit.com/data/v4"
 	faceitCS2Game    = "cs2"
+
+	leetifyApiKeyEnv  = "LEETIFY_API_KEY"
+	leetifyApiBaseURL = "https://api-public.cs-prod.leetify.com"
 )
 
 type Command struct{}
@@ -120,6 +123,11 @@ func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 		if faceit, err := fetchFaceitStats(ctx, faceitKey, steamID); err == nil && faceit != nil {
 			fmt.Fprintf(&b, "🟠 Faceit: level %d, elo %d\n", faceit.SkillLevel, faceit.FaceitElo)
 		}
+	}
+
+	if leetify, err := fetchLeetifyProfile(ctx, steamID); err == nil && leetify != nil {
+		fmt.Fprintf(&b, "📊 Leetify: rating %.2f, premier %d, faceit %d, winrate %.1f%% (%d matches)\n",
+			leetify.Ranks.Leetify, leetify.Ranks.Premier, leetify.Ranks.Faceit, leetify.Winrate*100, leetify.TotalMatches)
 	}
 
 	r.SendMessage(b.String())
@@ -244,6 +252,49 @@ func fetchFaceitStats(ctx context.Context, apiKey, steamID string) (*faceitGameS
 		return nil, nil
 	}
 	return &cs2Stats, nil
+}
+
+type leetifyRanks struct {
+	Leetify float64 `json:"leetify"`
+	Premier int     `json:"premier"`
+	Faceit  int     `json:"faceit"`
+}
+
+type leetifyProfileResponse struct {
+	Winrate      float64      `json:"winrate"`
+	TotalMatches int          `json:"total_matches"`
+	Ranks        leetifyRanks `json:"ranks"`
+}
+
+//nolint:errcheck
+func fetchLeetifyProfile(ctx context.Context, steamID string) (*leetifyProfileResponse, error) {
+	url := fmt.Sprintf("%s/v3/profile?steam64_id=%s", leetifyApiBaseURL, steamID)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	if leetifyKey := os.Getenv(leetifyApiKeyEnv); leetifyKey != "" {
+		req.Header.Set("Authorization", "Bearer "+leetifyKey)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, nil
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("leetify api returned status %d", resp.StatusCode)
+	}
+
+	var profile leetifyProfileResponse
+	if err := json.NewDecoder(resp.Body).Decode(&profile); err != nil {
+		return nil, err
+	}
+	return &profile, nil
 }
 
 func formatHours(minutes int) string {
