@@ -5,18 +5,26 @@
 You have to provide 4 env variables:
 
 - TELEGRAM_BOT_TOKEN - telegram token
+- DISCORD_TOKEN - discord token
+- STEAM_API_KEY - api key for steam command
+- FACEIT_API_KEY - api key for faceit command
 - OPENAI_TOKEN - chatgpt token
 - OWM_API_KEY - api key for weather command
 - DEFAULT_WEATHER_CITIES - default cities, e.g. Berlin,Chicago,Los Angeles
 - TAVILY_API_KEY - api key for tavily search
 - OPENAI_MODEL - optional, default is luna
 
-## Metrics
-Prometheus metrics are exposed on 8080 port: http://localhost:8080/metrics
+## Docker compose
 
 ```bash
-curl http://localhost:8080/metrics
+docker compose up -d
 ```
+
+## Metrics
+Metrics are pushed to otlp endpoint
+OTLP endpoint is configurable via env variable OTLP_ENDPOINT, default is http://localhost:4317
+
+see otlp documentation for more details: https://opentelemetry.io/docs/concepts/data-collection/
 
 ## Health endpoint
 url: http://localhost:8080/health
