@@ -22,7 +22,7 @@ const (
 
 	topGamesCount = 3
 
-	csstatsProfileURL = "https://csstats.net/steamid64/%s"
+	csstatsProfileURL = "https://csst.at/profile/%s"
 	leetifyProfileURL = "https://leetify.com/app/profile/%s"
 )
 
