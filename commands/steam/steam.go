@@ -21,6 +21,9 @@ const (
 	communityVisibilityPublic = 3
 
 	topGamesCount = 3
+
+	csstatsProfileURL = "https://csstats.net/steamid64/%s"
+	leetifyProfileURL = "https://leetify.com/app/profile/%s"
 )
 
 type Command struct{}
@@ -110,15 +113,21 @@ func (c *Command) Handler(s *messenger.Sender, r messenger.Receiver) error {
 		}
 	}
 
+	fmt.Fprintf(&b, "📈 csstats: %s\n", fmt.Sprintf(csstatsProfileURL, steamID))
+
 	if faceitKey := os.Getenv(faceitApiKeyEnv); faceitKey != "" {
 		if faceit, err := fetchFaceitStats(ctx, faceitKey, steamID); err == nil && faceit != nil {
 			fmt.Fprintf(&b, "🟠 Faceit: level %d, elo %d\n", faceit.SkillLevel, faceit.FaceitElo)
+			if faceit.ProfileURL != "" {
+				fmt.Fprintf(&b, "  %s\n", faceit.ProfileURL)
+			}
 		}
 	}
 
 	if leetify, err := fetchLeetifyStats(ctx, steamID); err == nil && leetify != nil {
 		fmt.Fprintf(&b, "📊 Leetify: rating %.2f, winrate %.1f%% (%d matches)\n",
 			leetify.profile.Ranks.Leetify, leetify.profile.Winrate*100, leetify.profile.TotalMatches)
+		fmt.Fprintf(&b, "  %s\n", fmt.Sprintf(leetifyProfileURL, steamID))
 
 		switch {
 		case leetify.profile.Ranks.Premier > 0:

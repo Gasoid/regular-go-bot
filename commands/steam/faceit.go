@@ -11,6 +11,7 @@ const (
 	faceitApiKeyEnv  = "FACEIT_API_KEY"
 	faceitApiBaseURL = "https://open.faceit.com/data/v4"
 	faceitCS2Game    = "cs2"
+	faceitProfileURL = "https://www.faceit.com/en/players/%s"
 )
 
 type faceitGameStats struct {
@@ -19,11 +20,17 @@ type faceitGameStats struct {
 }
 
 type faceitPlayerResponse struct {
-	Games map[string]faceitGameStats `json:"games"`
+	Nickname string                     `json:"nickname"`
+	Games    map[string]faceitGameStats `json:"games"`
+}
+
+type faceitProfile struct {
+	faceitGameStats
+	ProfileURL string
 }
 
 //nolint:errcheck
-func fetchFaceitStats(ctx context.Context, apiKey, steamID string) (*faceitGameStats, error) {
+func fetchFaceitStats(ctx context.Context, apiKey, steamID string) (*faceitProfile, error) {
 	url := fmt.Sprintf("%s/players?game=%s&game_player_id=%s", faceitApiBaseURL, faceitCS2Game, steamID)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
@@ -53,5 +60,10 @@ func fetchFaceitStats(ctx context.Context, apiKey, steamID string) (*faceitGameS
 	if !ok {
 		return nil, nil
 	}
-	return &cs2Stats, nil
+
+	profile := &faceitProfile{faceitGameStats: cs2Stats}
+	if player.Nickname != "" {
+		profile.ProfileURL = fmt.Sprintf(faceitProfileURL, player.Nickname)
+	}
+	return profile, nil
 }
